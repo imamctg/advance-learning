@@ -1,0 +1,31 @@
+import mongoose, { Schema, Document, Types } from 'mongoose'
+
+export interface IOrder extends Document {
+  userId: Types.ObjectId
+  courseId: Types.ObjectId
+  paymentType: string
+  amount: number
+  status: 'pending' | 'paid' | 'failed'
+  transactionId: string
+  receiptUrl?: string
+  createdAt: Date
+}
+
+const orderSchema = new Schema<IOrder>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    paymentType: { type: String, required: true },
+    amount: { type: Number, required: true },
+    status: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
+    },
+    transactionId: { type: String, required: true }, // 👈 এই ফিল্ড
+    receiptUrl: { type: String },
+  },
+  { timestamps: true }
+)
+
+export const Order = mongoose.model<IOrder>('Order', orderSchema)

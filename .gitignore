@@ -1,0 +1,14 @@
+# Global Ignore
+node_modules/
+.env
+.env.local
+.DS_Store
+*.log
+
+# Next.js (client)
+client/.next/
+client/out/
+
+# Express (server)
+server/dist/
+server/logs/
