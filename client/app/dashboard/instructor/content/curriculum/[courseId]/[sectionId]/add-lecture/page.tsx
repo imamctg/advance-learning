@@ -4,7 +4,6 @@
 
 import AddLectureForm from 'components/Course/AddLectureForm'
 import { useParams } from 'next/navigation'
-// import AddLectureForm from '@/components/course/AddLectureForm'
 
 const AddLecturePage = () => {
   const params = useParams()

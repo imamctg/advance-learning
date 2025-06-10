@@ -1,6 +1,6 @@
 // course.service.ts
 import { uploadToCloudinary } from '../../utils/cloudinaryUpload'
-import Course from './course.model'
+import Course, { ILecture } from './course.model'
 
 export const handleCourseCreation = async (
   body: any,
@@ -119,4 +119,108 @@ export const handleCourseCreation = async (
 
   await course.save()
   return course
+}
+
+export const handleCourseUpdate = async (
+  courseId: string,
+  body: any,
+  thumbnailFile?: Express.Multer.File
+) => {
+  const existingCourse = await Course.findById(courseId)
+  if (!existingCourse) {
+    throw new Error('Course not found')
+  }
+
+  // Thumbnail ফাইল থাকলে Cloudinary তে আপলোড করে url সেট করবো
+  let thumbnailUrl = existingCourse.thumbnail
+  if (thumbnailFile) {
+    thumbnailUrl = await uploadToCloudinary(
+      thumbnailFile.buffer,
+      'thumbnails',
+      `thumbnail-${Date.now()}`,
+      'image'
+    )
+  }
+
+  existingCourse.title = body.title || existingCourse.title
+  existingCourse.description = body.description || existingCourse.description
+  existingCourse.price = body.price || existingCourse.price
+  existingCourse.level = body.level || existingCourse.level
+  existingCourse.language = body.language || existingCourse.language
+  existingCourse.category = body.category || existingCourse.category
+  existingCourse.thumbnail = thumbnailUrl
+
+  await existingCourse.save()
+  return existingCourse
+}
+
+interface UpdateLectureParams {
+  courseId: string
+  sectionId: string
+  lectureId: string
+  title?: string
+  description?: string
+  videoFile?: Express.Multer.File
+  resourceFile?: Express.Multer.File
+}
+
+export const getLectureById = async (
+  courseId: string,
+  sectionId: string,
+  lectureId: string
+): Promise<ILecture | null> => {
+  const course = await Course.findById(courseId)
+
+  if (!course) return null
+
+  const section = course.sections.id(sectionId)
+  if (!section) return null
+
+  const lecture = section.lectures.id(lectureId)
+  return lecture || null
+}
+
+export const updateLectureById = async ({
+  courseId,
+  sectionId,
+  lectureId,
+  title,
+  description,
+  videoFile,
+  resourceFile,
+}: UpdateLectureParams): Promise<ILecture | null> => {
+  const course = await Course.findById(courseId)
+  if (!course) return null
+
+  const section = course.sections.id(sectionId)
+  if (!section) return null
+
+  const lecture = section.lectures.id(lectureId)
+  if (!lecture) return null
+
+  if (title) lecture.title = title
+  if (description) lecture.description = description
+
+  if (videoFile) {
+    const videoUrl = await uploadToCloudinary(
+      videoFile.buffer,
+      'lectureVideos',
+      `lecture_video_${Date.now()}`,
+      'video'
+    )
+    lecture.videoUrl = videoUrl
+  }
+
+  if (resourceFile) {
+    const resourceUrl = await uploadToCloudinary(
+      resourceFile.buffer,
+      'lectureResources',
+      `lecture_resource_${Date.now()}`,
+      'raw'
+    )
+    lecture.resourceUrl = resourceUrl
+  }
+
+  await course.save()
+  return lecture
 }

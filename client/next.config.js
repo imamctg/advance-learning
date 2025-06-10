@@ -1,18 +1,32 @@
 // const nextConfig = {
+//   // API Proxy 설정
 //   async rewrites() {
 //     return [
 //       {
 //         source: '/api/:path*',
-//         destination: 'http://localhost:5000/api/:path*', // Proxy to backend
+//         destination: 'http://localhost:5000/api/:path*',
 //       },
 //     ]
+//   },
+
+//   // Webpack ক্যাশে ডিসএবল (সঠিক উপায়)
+//   webpack: (config, { isServer }) => {
+//     if (!isServer) {
+//       config.cache = false
+//     }
+//     return config
 //   },
 // }
 
 // module.exports = nextConfig
 
 const nextConfig = {
-  // API Proxy 설정
+  // ✅ Image domains configuration for next/image
+  images: {
+    domains: ['res.cloudinary.com'],
+  },
+
+  // ✅ API Proxy 설정
   async rewrites() {
     return [
       {
@@ -22,7 +36,7 @@ const nextConfig = {
     ]
   },
 
-  // Webpack ক্যাশে ডিসএবল (সঠিক উপায়)
+  // ✅ Webpack ক্যাশে ডিসএবল (সঠিক উপায়)
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.cache = false

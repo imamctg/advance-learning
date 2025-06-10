@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from 'components/ui/button'
 import { Loader2 } from 'lucide-react'
@@ -9,6 +9,8 @@ import toast from 'react-hot-toast'
 import axios from 'axios'
 import { Textarea } from 'components/ui/textarea'
 import { Input } from 'components/ui/input'
+import { RootState } from 'features/redux/store'
+import { useSelector } from 'react-redux'
 
 interface AddLectureFormProps {
   courseId: string
@@ -21,7 +23,7 @@ export default function AddLectureForm({
 }: AddLectureFormProps) {
   const { t } = useTranslation()
   const router = useRouter()
-
+  const token = useSelector((state: RootState) => state.auth.token)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [videoFile, setVideoFile] = useState<File | null>(null)
@@ -45,11 +47,15 @@ export default function AddLectureForm({
       setLoading(true)
 
       const res = await axios.post(
-        `/api/courses/${courseId}/sections/${sectionId}/lectures`,
+        `http://localhost:5000/api/courses/${courseId}/sections/${sectionId}/lectures`,
         formData,
         {
+          // headers: {
+          //   'Content-Type': 'multipart/form-data',
+          // },
           headers: {
             'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
           },
         }
       )
