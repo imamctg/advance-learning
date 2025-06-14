@@ -224,3 +224,44 @@ export const updateLectureById = async ({
   await course.save()
   return lecture
 }
+
+interface UpdateSectionParams {
+  courseId: string
+  sectionId: string
+  title?: string
+  description?: string
+  isPublished?: boolean
+  resourceFile?: Express.Multer.File
+}
+
+export const updateSectionById = async ({
+  courseId,
+  sectionId,
+  title,
+  description,
+  isPublished,
+  resourceFile,
+}: UpdateSectionParams) => {
+  const course = await Course.findById(courseId)
+  if (!course) return null
+
+  const section = course.sections.id(sectionId)
+  if (!section) return null
+
+  if (title) section.title = title
+  if (description !== undefined) section.description = description
+  if (isPublished !== undefined) section.isPublished = isPublished
+
+  if (resourceFile) {
+    const resourceUrl = await uploadToCloudinary(
+      resourceFile.buffer,
+      'sectionResources',
+      `section_resource_${Date.now()}`,
+      'raw'
+    )
+    section.resourceUrl = resourceUrl
+  }
+
+  await course.save()
+  return section
+}

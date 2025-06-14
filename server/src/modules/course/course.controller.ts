@@ -370,3 +370,32 @@ export const updateLectureById = async (
     res.status(500).json({ message: 'Server error', error })
   }
 }
+
+// export const updateSectionByIdController = asyncHandler(async (req: Request, res: Response) => {
+export const updateSectionByIdController = async (
+  req: Request,
+  res: Response
+) => {
+  const { courseId, sectionId } = req.params
+  const { title, description, isPublished } = req.body
+
+  // Type assertion here:
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+  const resourceFile = files?.['resourceFile']?.[0]
+
+  const updatedSection = await courseService.updateSectionById({
+    courseId,
+    sectionId,
+    title,
+    description,
+    isPublished: isPublished === 'true', // since it's from FormData, it's string
+    resourceFile,
+  })
+
+  if (!updatedSection) {
+    res.status(404)
+    throw new Error('Section not found or update failed')
+  }
+
+  res.status(200).json({ section: updatedSection })
+}

@@ -14,6 +14,7 @@ import {
   deleteSection,
   getLectureById,
   updateLectureById,
+  updateSectionByIdController,
 } from './course.controller'
 import { requireRole } from '../../middlewares/roleMiddleware'
 import authMiddleware from '../../middlewares/authMiddleware'
@@ -125,6 +126,14 @@ router.put(
     { name: 'resource', maxCount: 1 },
   ]),
   updateLectureById
+)
+
+router.put(
+  '/courses/:courseId/sections/:sectionId',
+  authMiddleware,
+  requireRole(['instructor', 'admin']),
+  upload.fields([{ name: 'resourceFile', maxCount: 1 }]),
+  updateSectionByIdController
 )
 
 export default router

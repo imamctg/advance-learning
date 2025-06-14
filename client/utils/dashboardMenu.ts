@@ -126,6 +126,10 @@ export const menuByRole: Record<
           name: 'Quizzes',
           href: '/dashboard/instructor/content/quizzes',
         },
+        {
+          name: 'Assignments',
+          href: '/dashboard/instructor/content/assignments',
+        },
       ],
     },
     {

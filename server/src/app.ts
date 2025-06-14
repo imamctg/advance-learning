@@ -8,6 +8,7 @@ import adminRoutes from './modules/admin/adminRoutes'
 import messageRoutes from './modules/message/message.routes'
 import orderRoutes from './modules/order/order.routes'
 import certificateRoutes from './modules/certificate/certificate.route'
+import quizRoutes from './modules/quiz/quiz.routes'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -27,8 +28,10 @@ app.use('/api', paymentRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/instructor', courseRoutes)
+app.use('/api/instructor', quizRoutes)
 app.use('/api/messages', messageRoutes)
 app.use('/api/orders', orderRoutes)
+// app.use('/api/quizzes', quizRoutes)
 
 app.use('/api', certificateRoutes)
 
