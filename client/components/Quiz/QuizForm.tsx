@@ -1,225 +1,50 @@
-// 'use client'
-
-// import React, { useEffect, useState } from 'react'
-// import axios from 'axios'
-// import { toast } from 'react-hot-toast'
-// import QuestionEditor, { QuestionType } from './QuestionEditor'
-
-// type QuizFormProps = {
-//   parentId: string // sectionId or lectureId
-//   parentType: 'section' | 'lecture'
-//   token: string
-//   onSuccess?: () => void
-// }
-
-// const QuizForm: React.FC<QuizFormProps> = ({
-//   parentId,
-//   parentType,
-//   token,
-//   onSuccess,
-// }) => {
-//   const [title, setTitle] = useState('')
-//   const [instructions, setInstructions] = useState('')
-//   const [duration, setDuration] = useState(15)
-//   const [totalMarks, setTotalMarks] = useState(10)
-//   const [questions, setQuestions] = useState<QuestionType[]>([])
-//   const [loading, setLoading] = useState(false)
-
-//   const apiBase =
-//     parentType === 'section'
-//       ? `http://localhost:5000/api/quizzes/sections/${parentId}/quiz`
-//       : `http://localhost:5000/api/quizzes/lectures/${parentId}/quiz`
-
-//   // Fetch existing quiz
-//   useEffect(() => {
-//     const fetchQuiz = async () => {
-//       try {
-//         const res = await axios.get(apiBase, {
-//           headers: { Authorization: `Bearer ${token}` },
-//         })
-//         const quiz = res.data.quiz
-//         if (quiz) {
-//           setTitle(quiz.title || '')
-//           setInstructions(quiz.instructions || '')
-//           setDuration(quiz.duration || 15)
-//           setTotalMarks(quiz.totalMarks || 10)
-//           setQuestions(quiz.questions || [])
-//         }
-//       } catch (err) {
-//         console.log('No existing quiz found.')
-//       }
-//     }
-
-//     fetchQuiz()
-//   }, [apiBase, token])
-
-//   const handleAddQuestion = () => {
-//     setQuestions((prev) => [
-//       ...prev,
-//       {
-//         questionText: '',
-//         options: ['', '', '', ''],
-//         correctAnswer: 0,
-//         marks: 1,
-//         explanation: '',
-//       },
-//     ])
-//   }
-
-//   const handleQuestionChange = (index: number, updated: QuestionType) => {
-//     const newQ = [...questions]
-//     newQ[index] = updated
-//     setQuestions(newQ)
-//   }
-
-//   const handleDeleteQuestion = (index: number) => {
-//     const newQ = [...questions]
-//     newQ.splice(index, 1)
-//     setQuestions(newQ)
-//   }
-
-//   const handleSubmit = async () => {
-//     if (!title.trim()) return toast.error('Quiz title is required.')
-//     if (questions.length === 0)
-//       return toast.error('At least one question is required.')
-
-//     setLoading(true)
-//     try {
-//       await axios.put(
-//         apiBase,
-//         {
-//           title,
-//           instructions,
-//           duration,
-//           totalMarks,
-//           questions,
-//         },
-//         {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }
-//       )
-
-//       toast.success('Quiz saved successfully!')
-//       onSuccess?.()
-//     } catch (err) {
-//       toast.error('Failed to save quiz.')
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
-
-//   return (
-//     <div className='space-y-6'>
-//       <div>
-//         <label className='block font-medium'>Quiz Title</label>
-//         <input
-//           className='w-full border p-2 rounded'
-//           value={title}
-//           onChange={(e) => setTitle(e.target.value)}
-//         />
-//       </div>
-
-//       <div>
-//         <label className='block font-medium'>Instructions</label>
-//         <textarea
-//           className='w-full border p-2 rounded'
-//           rows={4}
-//           value={instructions}
-//           onChange={(e) => setInstructions(e.target.value)}
-//         />
-//       </div>
-
-//       <div className='grid grid-cols-2 gap-4'>
-//         <div>
-//           <label className='block font-medium'>Duration (minutes)</label>
-//           <input
-//             type='number'
-//             className='w-full border p-2 rounded'
-//             value={duration}
-//             onChange={(e) => setDuration(Number(e.target.value))}
-//           />
-//         </div>
-
-//         <div>
-//           <label className='block font-medium'>Total Marks</label>
-//           <input
-//             type='number'
-//             className='w-full border p-2 rounded'
-//             value={totalMarks}
-//             onChange={(e) => setTotalMarks(Number(e.target.value))}
-//           />
-//         </div>
-//       </div>
-
-//       <div>
-//         <h3 className='text-lg font-semibold mt-6 mb-2'>Questions</h3>
-//         {questions.map((q, index) => (
-//           <QuestionEditor
-//             key={index}
-//             index={index}
-//             question={q}
-//             onChange={handleQuestionChange}
-//             onDelete={handleDeleteQuestion}
-//           />
-//         ))}
-
-//         <button
-//           onClick={handleAddQuestion}
-//           className='text-sm text-blue-600 underline mt-3'
-//         >
-//           ➕ Add Question
-//         </button>
-//       </div>
-
-//       <div className='pt-6'>
-//         <button
-//           onClick={handleSubmit}
-//           disabled={loading}
-//           className='bg-indigo-600 text-white px-5 py-2 rounded hover:bg-indigo-700 disabled:opacity-50'
-//         >
-//           {loading ? 'Saving...' : 'Save Quiz'}
-//         </button>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default QuizForm
-
 'use client'
-
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
 import QuestionEditor, { QuestionType } from './QuestionEditor'
 
 type QuizFormProps = {
-  parentId: string // sectionId or lectureId
+  initialData?: {
+    _id?: string
+    title: string
+    instructions?: string
+    duration: number
+    totalMarks: number
+    questions: QuestionType[]
+  }
+  parentId: string
   parentType: 'section' | 'lecture'
   token: string
+  courseId: string
   onSuccess?: () => void
 }
 
 const QuizForm: React.FC<QuizFormProps> = ({
+  initialData,
   parentId,
   parentType,
   token,
+  courseId,
   onSuccess,
 }) => {
-  const [title, setTitle] = useState('')
-  const [instructions, setInstructions] = useState('')
-  const [duration, setDuration] = useState(15)
-  const [totalMarks, setTotalMarks] = useState(10)
-  const [questions, setQuestions] = useState<QuestionType[]>([])
+  const [title, setTitle] = useState(initialData?.title || '')
+  const [instructions, setInstructions] = useState(
+    initialData?.instructions || ''
+  )
+  const [duration, setDuration] = useState(initialData?.duration || 15)
+  const [totalMarks, setTotalMarks] = useState(initialData?.totalMarks || 10)
+  const [questions, setQuestions] = useState<QuestionType[]>(
+    initialData?.questions || []
+  )
+  const [isEditing, setIsEditing] = useState(!!initialData?._id)
   const [loading, setLoading] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
 
   const apiBase =
     parentType === 'section'
-      ? `http://localhost:5000/api/quizzes/sections/${parentId}/quiz`
-      : `http://localhost:5000/api/quizzes/lectures/${parentId}/quiz`
+      ? `http://localhost:5000/api/quizzes/sections/${parentId}`
+      : `http://localhost:5000/api/quizzes/lectures/${parentId}`
 
-  // Fetch existing quiz
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
@@ -229,17 +54,16 @@ const QuizForm: React.FC<QuizFormProps> = ({
         const quiz = res.data.quiz
         if (quiz) {
           setIsEditing(true)
-          setTitle(quiz.title || '')
-          setInstructions(quiz.instructions || '')
-          setDuration(quiz.duration || 15)
-          setTotalMarks(quiz.totalMarks || 10)
-          setQuestions(quiz.questions || [])
+          setTitle(quiz.title)
+          setInstructions(quiz.instructions)
+          setDuration(quiz.duration)
+          setTotalMarks(quiz.totalMarks)
+          setQuestions(quiz.questions)
         }
       } catch (err) {
         console.log('No existing quiz found.')
       }
     }
-
     fetchQuiz()
   }, [apiBase, token])
 
@@ -256,16 +80,8 @@ const QuizForm: React.FC<QuizFormProps> = ({
     ])
   }
 
-  const handleQuestionChange = (index: number, updated: QuestionType) => {
-    const newQ = [...questions]
-    newQ[index] = updated
-    setQuestions(newQ)
-  }
-
   const handleDeleteQuestion = (index: number) => {
-    const newQ = [...questions]
-    newQ.splice(index, 1)
-    setQuestions(newQ)
+    setQuestions((prev) => prev.filter((_, i) => i !== index))
   }
 
   const validateForm = (): boolean => {
@@ -273,56 +89,131 @@ const QuizForm: React.FC<QuizFormProps> = ({
       toast.error('Quiz title is required.')
       return false
     }
-
     if (questions.length === 0) {
       toast.error('At least one question is required.')
       return false
     }
-
-    // Validate each question
-    for (const [index, question] of questions.entries()) {
-      if (!question.questionText.trim()) {
-        toast.error(`Question ${index + 1} text is required.`)
+    for (const [i, q] of questions.entries()) {
+      if (!q.questionText.trim()) {
+        toast.error(`Question ${i + 1} text is required.`)
         return false
       }
-
-      if (question.options.some((opt) => !opt.trim())) {
-        toast.error(`All options must be filled for Question ${index + 1}.`)
+      if (q.options.some((o) => !o.trim())) {
+        toast.error(`All options for question ${i + 1} must be filled.`)
         return false
       }
-
-      if (question.marks <= 0) {
-        toast.error(`Marks must be positive for Question ${index + 1}.`)
+      if (q.marks <= 0) {
+        toast.error(`Marks must be positive for question ${i + 1}.`)
         return false
       }
     }
-
     return true
   }
 
+  // const handleSubmit = async () => {
+  //   // console.log('Sending courseId:', courseId)
+  //   // console.log('Payload:', {
+  //   //   title,
+  //   //   instructions,
+  //   //   duration,
+  //   //   totalMarks,
+  //   //   questions,
+  //   //   course: courseId,
+  //   // })
+
+  //   if (!validateForm()) return
+  //   setLoading(true)
+  //   try {
+  //     const method = isEditing ? 'put' : 'post'
+  //     const res = await axios[method](
+  //       apiBase,
+  //       {
+  //         title,
+  //         instructions,
+  //         duration,
+  //         totalMarks,
+  //         questions,
+  //         course: courseId, // ✅ courseId now included
+  //       },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     )
+  //     toast.success(`Quiz ${isEditing ? 'updated' : 'created'} successfully!`)
+  //     onSuccess?.()
+  //   } catch (err) {
+  //     toast.error(`Failed to ${isEditing ? 'update' : 'create'} quiz.`)
+  //     console.error(err)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
   const handleSubmit = async () => {
     if (!validateForm()) return
-
     setLoading(true)
     try {
-      await axios.put(
-        apiBase,
+      const method = isEditing ? 'put' : 'post'
+      const url = isEditing
+        ? `http://localhost:5000/api/quizzes/${initialData?._id}`
+        : apiBase
+
+      const res = await axios[method](
+        url,
         {
           title,
           instructions,
           duration,
           totalMarks,
           questions,
+          course: courseId,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       )
-
       toast.success(`Quiz ${isEditing ? 'updated' : 'created'} successfully!`)
       onSuccess?.()
     } catch (err) {
       toast.error(`Failed to ${isEditing ? 'update' : 'create'} quiz.`)
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // const handleDelete = async () => {
+  //   if (!confirm('Are you sure you want to delete this quiz?')) return
+  //   setLoading(true)
+  //   try {
+  //     await axios.delete(apiBase, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     toast.success('Quiz deleted successfully!')
+  //     onSuccess?.()
+  //   } catch (err) {
+  //     toast.error('Failed to delete quiz.')
+  //     console.error(err)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this quiz?')) return
+    setLoading(true)
+    try {
+      const url = isEditing
+        ? `http://localhost:5000/api/quizzes/${initialData?._id}`
+        : apiBase
+
+      await axios.delete(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      toast.success('Quiz deleted successfully!')
+      onSuccess?.()
+    } catch (err) {
+      toast.error('Failed to delete quiz.')
       console.error(err)
     } finally {
       setLoading(false)
@@ -337,119 +228,86 @@ const QuizForm: React.FC<QuizFormProps> = ({
         </h2>
         <button
           onClick={handleAddQuestion}
-          className='flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm'
+          className='px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm flex items-center gap-1'
         >
-          <span>+</span> Add Question
+          + Add Question
         </button>
       </div>
 
       <div className='space-y-4'>
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-1'>
-            Quiz Title *
-          </label>
+        <div className='grid grid-cols-1 gap-4'>
           <input
-            className='w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500'
+            type='text'
+            placeholder='Quiz Title'
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder='Enter quiz title'
+            className='border px-4 py-2 rounded w-full'
           />
-        </div>
-
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-1'>
-            Instructions
-          </label>
           <textarea
-            className='w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500'
-            rows={4}
+            placeholder='Instructions (optional)'
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
-            placeholder='Provide instructions for the quiz'
+            className='border px-4 py-2 rounded w-full'
+            rows={3}
           />
-        </div>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
-              Duration (minutes) *
-            </label>
+          <div className='grid grid-cols-2 gap-4'>
             <input
               type='number'
-              min='1'
-              className='w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500'
+              min={1}
+              placeholder='Duration (minutes)'
               value={duration}
-              onChange={(e) => setDuration(Math.max(1, Number(e.target.value)))}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              className='border px-4 py-2 rounded w-full'
             />
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
-              Total Marks *
-            </label>
             <input
               type='number'
-              min='1'
-              className='w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500'
+              min={1}
+              placeholder='Total Marks'
               value={totalMarks}
-              onChange={(e) =>
-                setTotalMarks(Math.max(1, Number(e.target.value)))
-              }
+              onChange={(e) => setTotalMarks(Number(e.target.value))}
+              className='border px-4 py-2 rounded w-full'
             />
           </div>
         </div>
+
+        <div className='space-y-6'>
+          {questions.map((q, index) => (
+            <QuestionEditor
+              key={index}
+              question={q}
+              onChange={(updated) =>
+                setQuestions((prev) =>
+                  prev.map((item, i) => (i === index ? updated : item))
+                )
+              }
+              onDelete={() => handleDeleteQuestion(index)}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className='mt-6'>
-        <h3 className='text-lg font-semibold text-gray-800 mb-3'>Questions</h3>
-
-        {questions.length === 0 ? (
-          <div className='text-center py-4 text-gray-500'>
-            No questions added yet. Click "Add Question" to get started.
-          </div>
-        ) : (
-          <div className='space-y-4'>
-            {questions.map((q, index) => (
-              <QuestionEditor
-                key={index}
-                index={index}
-                question={q}
-                onChange={handleQuestionChange}
-                onDelete={handleDeleteQuestion}
-              />
-            ))}
-          </div>
+      <div className='pt-6 flex justify-end space-x-3'>
+        {isEditing && (
+          <button
+            onClick={handleDelete}
+            disabled={loading}
+            className='px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50'
+          >
+            {loading ? 'Deleting...' : 'Delete Quiz'}
+          </button>
         )}
-      </div>
-
-      <div className='pt-6 flex justify-end'>
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed'
+          className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50'
         >
-          {loading ? (
-            <span className='flex items-center gap-2'>
-              <svg className='animate-spin h-4 w-4' viewBox='0 0 24 24'>
-                <circle
-                  className='opacity-25'
-                  cx='12'
-                  cy='12'
-                  r='10'
-                  stroke='currentColor'
-                  strokeWidth='4'
-                ></circle>
-                <path
-                  className='opacity-75'
-                  fill='currentColor'
-                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                ></path>
-              </svg>
-              {isEditing ? 'Updating...' : 'Creating...'}
-            </span>
-          ) : (
-            <span>{isEditing ? 'Update Quiz' : 'Create Quiz'}</span>
-          )}
+          {loading
+            ? isEditing
+              ? 'Updating...'
+              : 'Creating...'
+            : isEditing
+            ? 'Update Quiz'
+            : 'Create Quiz'}
         </button>
       </div>
     </div>

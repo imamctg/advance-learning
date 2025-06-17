@@ -1,31 +1,33 @@
-import express from 'express'
-import {
-  addQuiz,
-  getLectureQuizzes,
-  deleteQuizById,
-  updateQuizById,
-} from './quiz.controller'
+import { Router } from 'express'
+import * as quizCtrl from './quiz.controller'
 import authMiddleware from '../../middlewares/authMiddleware'
-import { requireRole } from '../../middlewares/roleMiddleware'
-import { getCourseById } from '../course/course.controller'
 
-const router = express.Router()
+const router = Router({ mergeParams: true })
 
-router.get('/courses/:courseId/quizzes', authMiddleware, getCourseById)
-router.post('/', authMiddleware, requireRole(['instructor']), addQuiz)
-router.get('/:lectureId', authMiddleware, getLectureQuizzes)
+router.use(authMiddleware)
 
-router.delete(
-  '/:quizId',
-  authMiddleware,
-  requireRole(['instructor']),
-  deleteQuizById
-)
-router.put(
-  '/:quizId',
-  authMiddleware,
-  requireRole(['instructor']),
-  updateQuizById
-)
+router.get('/course/:courseId', quizCtrl.getCourseQuizzes)
+router.get('/:quizId', quizCtrl.getQuizDetails)
+
+// Lecture Quiz Routes
+router.put('/:quizId', quizCtrl.updateQuiz)
+router.delete('/:quizId', quizCtrl.deleteQuiz)
+
+router.post('/lectures/:lectureId', quizCtrl.createQuiz)
+router.get('/lectures/:lectureId', quizCtrl.getQuiz)
+// router.put('/lectures/:lectureId', quizCtrl.updateQuiz)
+// router.delete('/lectures/:lectureId', quizCtrl.deleteQuiz)
+
+// Section Quiz Routes
+router.post('/sections/:sectionId', quizCtrl.createQuiz)
+router.get('/sections/:sectionId', quizCtrl.getQuiz)
+// router.put('/sections/:sectionId', quizCtrl.updateQuiz)
+// router.delete('/sections/:sectionId', quizCtrl.deleteQuiz)
+
+router.get('/student/:quizId', authMiddleware, quizCtrl.getStudentQuiz)
+
+router.post('/submit/:quizId', authMiddleware, quizCtrl.submitQuiz)
+
+router.get('/results/:courseId', authMiddleware, quizCtrl.getQuizResults)
 
 export default router

@@ -11,38 +11,33 @@ export type QuestionType = {
   explanation?: string
 }
 
-// Props for QuestionEditor
+// Updated props: remove index parameter
 type QuestionEditorProps = {
-  index: number
   question: QuestionType
-  onChange: (index: number, updated: QuestionType) => void
-  onDelete: (index: number) => void
+  onChange: (updated: QuestionType) => void
+  onDelete: () => void
 }
 
 const QuestionEditor: React.FC<QuestionEditorProps> = ({
-  index,
   question,
   onChange,
   onDelete,
 }) => {
   const updateField = (field: keyof QuestionType, value: any) => {
-    onChange(index, { ...question, [field]: value })
+    onChange({ ...question, [field]: value })
   }
 
   const updateOption = (optIndex: number, value: string) => {
     const newOptions = [...question.options]
     newOptions[optIndex] = value
-    onChange(index, { ...question, options: newOptions })
+    onChange({ ...question, options: newOptions })
   }
 
   return (
     <div className='border rounded p-4 mt-4 bg-gray-50'>
       <div className='flex justify-between items-center mb-2'>
-        <label className='font-medium'>Question {index + 1}</label>
-        <button
-          onClick={() => onDelete(index)}
-          className='text-red-500 text-sm'
-        >
+        <label className='font-medium'>Question</label>
+        <button onClick={onDelete} className='text-red-500 text-sm'>
           ❌ Remove
         </button>
       </div>

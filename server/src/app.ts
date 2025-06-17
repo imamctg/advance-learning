@@ -24,14 +24,14 @@ app.use('/api/auth', authRoutes)
 app.use('/api/courses', courseRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api', paymentRoutes)
-
 app.use('/api/user', userRoutes)
 app.use('/api/admin', adminRoutes)
-app.use('/api/instructor', courseRoutes)
-app.use('/api/instructor', quizRoutes)
 app.use('/api/messages', messageRoutes)
 app.use('/api/orders', orderRoutes)
-// app.use('/api/quizzes', quizRoutes)
+
+app.use('/api/instructor', courseRoutes)
+app.use('/api/instructor', quizRoutes)
+app.use('/api/quizzes', quizRoutes)
 
 app.use('/api', certificateRoutes)
 

@@ -33,7 +33,7 @@ router.post(
 
 // Get all courses
 router.get('/', getAllCourses)
-// router.get('/:instructorId/courses', verifyToken, getInstructorCourses)
+
 router.get('/:instructorId/courses', authMiddleware, getInstructorCourses)
 
 router.get(
