@@ -22,6 +22,7 @@ app.use(express.json())
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/courses', courseRoutes)
+app.use('/api/lectures', courseRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api', paymentRoutes)
 app.use('/api/user', userRoutes)

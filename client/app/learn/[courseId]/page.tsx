@@ -210,24 +210,40 @@ export default function CourseDetailsPage() {
   }
 
   const markLectureCompleted = async (lectureId: string) => {
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
     try {
-      await axios.patch(`/api/lectures/${lectureId}/complete`)
-      setCourse((prev) => {
-        if (!prev) return null
-        return {
-          ...prev,
-          sections: prev.sections.map((section) => ({
-            ...section,
-            lectures: section.lectures.map((lecture) =>
-              lecture._id === lectureId
-                ? { ...lecture, completed: true }
-                : lecture
-            ),
-          })),
+      const response = await axios.put(
+        `http://localhost:5000/api/courses/lectures/${lectureId}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      })
+      )
+
+      if (response.data.success) {
+        setCourse((prev) => {
+          if (!prev) return null
+          return {
+            ...prev,
+            sections: prev.sections.map((section) => ({
+              ...section,
+              lectures: section.lectures.map((lecture) =>
+                lecture._id === lectureId
+                  ? { ...lecture, completed: true }
+                  : lecture
+              ),
+            })),
+          }
+        })
+      }
     } catch (err) {
       console.error('Failed to mark lecture complete:', err)
+      // Show error to user
     }
   }
 

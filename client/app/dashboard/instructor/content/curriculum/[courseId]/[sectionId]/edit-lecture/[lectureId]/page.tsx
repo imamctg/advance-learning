@@ -10,9 +10,13 @@ import { toast } from 'sonner'
 import { Label } from 'components/ui/label'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
+import { LectureResource } from 'types/lecture'
+import { Loader2 } from 'lucide-react'
 
 export default function EditLecturePage() {
   const token = useSelector((state: RootState) => state.auth.token)
+  const [resources, setResources] = useState<LectureResource[]>([])
+
   const { courseId, sectionId, lectureId } = useParams()
   const router = useRouter()
 
@@ -21,9 +25,12 @@ export default function EditLecturePage() {
     description: '',
   })
   const [videoFile, setVideoFile] = useState<File | null>(null)
-  const [resourceFile, setResourceFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [progress, setProgress] = useState({
+    percentage: 0,
+    message: 'Preparing to upload...',
+  })
 
   useEffect(() => {
     const fetchLecture = async () => {
@@ -37,9 +44,18 @@ export default function EditLecturePage() {
           }
         )
 
-        console.log(res, 'res')
-        const { title, description } = res.data.data
+        const {
+          title,
+          description,
+          resources: lectureResources,
+        } = res.data.data
         setForm({ title, description })
+        setResources(
+          lectureResources?.map((r: any) => ({
+            ...r,
+            file: null, // We don't have the actual file, just the URL
+          })) || []
+        )
       } catch {
         toast.error('Failed to load lecture')
       } finally {
@@ -48,7 +64,7 @@ export default function EditLecturePage() {
     }
 
     if (lectureId) fetchLecture()
-  }, [lectureId, courseId, sectionId])
+  }, [lectureId, courseId, sectionId, token])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -57,18 +73,111 @@ export default function EditLecturePage() {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
+  // const handleUpdate = async () => {
+  //   if (!form.title.trim()) return toast.error('Title is required')
+
+  //   try {
+  //     setIsSubmitting(true)
+  //     setProgress({ percentage: 0, message: 'Preparing files...' })
+
+  //     const formData = new FormData()
+  //     formData.append('title', form.title)
+  //     formData.append('description', form.description)
+
+  //     // Count total files for progress calculation
+  //     let totalFiles = videoFile ? 1 : 0
+  //     resources.forEach((resource) => {
+  //       if (resource.type === 'file' && resource.file) {
+  //         totalFiles++
+  //       }
+  //     })
+
+  //     let uploadedFiles = 0
+
+  //     if (videoFile) {
+  //       formData.append('video', videoFile)
+  //       uploadedFiles++
+  //       setProgress({
+  //         percentage: Math.round((uploadedFiles / totalFiles) * 100),
+  //         message: 'Uploading lecture video...',
+  //       })
+  //     }
+
+  //     // Append resources with proper field names
+  //     resources.forEach((resource, index) => {
+  //       if (resource.type === 'file' && resource.file) {
+  //         formData.append(`resources[${index}][file]`, resource.file)
+  //         formData.append(`resources[${index}][type]`, 'file')
+  //         formData.append(
+  //           `resources[${index}][name]`,
+  //           resource.name || resource.file.name
+  //         )
+
+  //         uploadedFiles++
+  //         setProgress({
+  //           percentage: Math.round((uploadedFiles / totalFiles) * 100),
+  //           message: `Uploading resource ${uploadedFiles} of ${totalFiles}...`,
+  //         })
+  //       } else if (resource.type === 'link') {
+  //         formData.append(`resources[${index}][type]`, 'link')
+  //         formData.append(`resources[${index}][url]`, resource.url)
+  //         formData.append(
+  //           `resources[${index}][name]`,
+  //           resource.name || resource.url
+  //         )
+  //       }
+  //     })
+
   const handleUpdate = async () => {
     if (!form.title.trim()) return toast.error('Title is required')
 
-    const formData = new FormData()
-    formData.append('title', form.title)
-    formData.append('description', form.description)
-
-    if (videoFile) formData.append('video', videoFile)
-    if (resourceFile) formData.append('resource', resourceFile)
-
-    setSaving(true)
     try {
+      setIsSubmitting(true)
+      setProgress({ percentage: 0, message: 'Preparing files...' })
+
+      const formData = new FormData()
+      formData.append('title', form.title)
+      formData.append('description', form.description)
+
+      // Process all resources
+      const processedResources = resources
+        .map((resource) => {
+          if (resource.type === 'file') {
+            return {
+              type: 'file',
+              name:
+                resource.name ||
+                (resource.file ? resource.file.name : resource.url),
+              url: resource.url || '', // Keep existing URL if no new file
+              file: resource.file || undefined,
+            }
+          } else if (resource.type === 'link') {
+            return {
+              type: 'link',
+              name: resource.name || resource.url,
+              url: resource.url,
+            }
+          }
+          return null
+        })
+        .filter(Boolean)
+
+      formData.append('resources', JSON.stringify(processedResources))
+
+      if (videoFile) {
+        formData.append('video', videoFile)
+      }
+
+      // Add file resources to FormData
+      resources.forEach((resource) => {
+        if (resource.type === 'file' && resource.file) {
+          formData.append('resourceFiles', resource.file)
+        }
+      })
+
+      // Final upload progress
+      setProgress({ percentage: 95, message: 'Finalizing lecture update...' })
+
       await axios.put(
         `http://localhost:5000/api/instructor/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
         formData,
@@ -77,14 +186,35 @@ export default function EditLecturePage() {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              )
+              setProgress({
+                percentage: percentCompleted,
+                message: 'Uploading files...',
+              })
+            }
+          },
         }
       )
+
+      setProgress({ percentage: 100, message: 'Lecture updated successfully!' })
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
       toast.success('Lecture updated successfully!')
       router.push(`/dashboard/instructor/content/curriculum/${courseId}`)
-    } catch {
-      toast.error('Failed to update lecture')
+    } catch (error: any) {
+      console.error('Error updating lecture:', error)
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          'Failed to update lecture'
+      )
     } finally {
-      setSaving(false)
+      setIsSubmitting(false)
+      setProgress({ percentage: 0, message: '' })
     }
   }
 
@@ -92,6 +222,33 @@ export default function EditLecturePage() {
 
   return (
     <div className='max-w-xl mx-auto p-6'>
+      {/* Loading overlay */}
+      {isSubmitting && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-50'>
+          <div className='bg-white p-6 rounded-lg max-w-md w-full'>
+            <div className='flex items-center space-x-4 mb-4'>
+              <Loader2 className='animate-spin h-8 w-8 text-blue-500' />
+              <div>
+                <h3 className='font-semibold text-lg'>Updating Lecture</h3>
+                <p className='text-gray-600'>{progress.message}</p>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className='w-full bg-gray-200 rounded-full h-2.5'>
+              <div
+                className='bg-blue-600 h-2.5 rounded-full'
+                style={{ width: `${progress.percentage}%` }}
+              ></div>
+            </div>
+
+            <p className='text-right mt-1 text-sm text-gray-500'>
+              {progress.percentage}% complete
+            </p>
+          </div>
+        </div>
+      )}
+
       <h1 className='text-2xl font-bold mb-4'>✏️ Edit Lecture</h1>
 
       <div className='space-y-4'>
@@ -109,25 +266,114 @@ export default function EditLecturePage() {
           />
         </div>
         <div>
-          <Label htmlFor='video'>Upload Video</Label>
+          <Label htmlFor='video'>
+            Upload Video (Leave empty to keep current)
+          </Label>
           <Input
             type='file'
             accept='video/*'
             onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
           />
         </div>
-        <div>
-          <Label htmlFor='resource'>Attach Resource</Label>
-          <Input
-            type='file'
-            onChange={(e) => setResourceFile(e.target.files?.[0] || null)}
-          />
+
+        {/* Resources section */}
+        <div className='space-y-2'>
+          <label className='block font-medium'>Resources</label>
+          {resources.map((resource, index) => (
+            <div key={index} className='flex items-center gap-2 mb-2'>
+              {resource.type === 'file' ? (
+                resource.file ? (
+                  <span className='text-sm'>{resource.file.name}</span>
+                ) : (
+                  <span className='text-sm'>{resource.name}</span>
+                )
+              ) : (
+                <input
+                  type='url'
+                  value={resource.url}
+                  onChange={(e) => {
+                    const updated = [...resources]
+                    updated[index].url = e.target.value
+                    setResources(updated)
+                  }}
+                  className='flex-1 border px-2 py-1 rounded text-sm'
+                />
+              )}
+              <button
+                type='button'
+                onClick={() => {
+                  const updated = [...resources]
+                  updated.splice(index, 1)
+                  setResources(updated)
+                }}
+                className='text-red-500 hover:text-red-700'
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+
+          <div className='flex gap-2'>
+            <button
+              type='button'
+              onClick={() =>
+                setResources([
+                  ...resources,
+                  { type: 'file', name: '', url: '', file: null },
+                ])
+              }
+              className='bg-gray-200 px-2 py-1 rounded text-sm'
+            >
+              Add File
+            </button>
+            <button
+              type='button'
+              onClick={() =>
+                setResources([
+                  ...resources,
+                  { type: 'link', name: '', url: '' },
+                ])
+              }
+              className='bg-gray-200 px-2 py-1 rounded text-sm'
+            >
+              Add Link
+            </button>
+          </div>
+
+          {resources.map(
+            (resource, index) =>
+              resource.type === 'file' &&
+              !resource.file &&
+              !resource.url && (
+                <div key={`file-${index}`} className='mt-1'>
+                  <input
+                    type='file'
+                    accept='.pdf,.zip,.png,.jpg,.jpeg'
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        const updated = [...resources]
+                        updated[index] = {
+                          type: 'file',
+                          name: file.name,
+                          url: '',
+                          file,
+                        }
+                        setResources(updated)
+                      }
+                    }}
+                    className='w-full text-sm'
+                  />
+                </div>
+              )
+          )}
         </div>
       </div>
 
       <div className='pt-4'>
-        <Button onClick={handleUpdate} disabled={saving}>
-          {saving ? 'Updating...' : 'Update Lecture'}
+        <Button onClick={handleUpdate} disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className='animate-spin w-4 h-4 mr-2' />}
+          {isSubmitting ? 'Updating...' : 'Update Lecture'}
         </Button>
       </div>
     </div>

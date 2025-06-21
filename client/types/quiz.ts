@@ -18,9 +18,15 @@ export interface Quiz {
 export interface Lecture {
   _id: string
   title: string
+  description: string
   videoUrl: string
   duration: number
+  isFreePreview: boolean
   completed?: boolean
+  resources: { type: string; name: string; url: string; mimeType: string }[]
+  resourceUrl?: string
+  resourcePublicId?: string
+  resourceType?: string // 'link' or MIME type like 'application/pdf'
 }
 
 export interface Section {

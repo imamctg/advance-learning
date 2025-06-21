@@ -166,12 +166,20 @@ export const handleRegister = async (
       const folder = 'instructors/nid'
       const filename = `${Date.now()}-${req.file.originalname}`
 
-      nidFileUrl = await uploadToCloudinary(
+      // nidFileUrl = await uploadToCloudinary(
+      //   fileBuffer,
+      //   folder,
+      //   filename,
+      //   'image'
+      // )
+
+      const nidUpload = await uploadToCloudinary(
         fileBuffer,
-        folder,
-        filename,
+        'instructors/nid',
+        `nid_${Date.now()}`,
         'image'
       )
+      nidFileUrl = nidUpload.secure_url // ✅ correct
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)

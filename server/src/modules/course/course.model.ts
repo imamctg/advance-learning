@@ -19,7 +19,10 @@ export interface ILecture extends Document {
   duration?: number
   isFreePreview?: boolean
   description?: string
+  resources: { type: string; name: string; url: string; mimeType: string }[]
   resourceUrl?: string
+  resourcePublicId?: string
+  resourceType?: string
 }
 
 export interface ISection extends Document {
@@ -45,6 +48,17 @@ export interface ICourse extends Document {
 }
 
 // ---------- SCHEMAS ----------
+
+const resourceSchema = new Schema(
+  {
+    type: { type: String, enum: ['file', 'link'], required: true },
+    name: { type: String, required: true },
+    url: { type: String, required: true },
+    mimeType: { type: String }, // Only for file resources
+  },
+  { _id: false }
+)
+
 const lectureSchema = new Schema<ILecture>(
   {
     title: { type: String, required: true },
@@ -52,10 +66,22 @@ const lectureSchema = new Schema<ILecture>(
     duration: { type: Number },
     isFreePreview: { type: Boolean, default: false },
     description: { type: String },
-    resourceUrl: { type: String },
+    resources: [resourceSchema],
   },
-  { _id: true } // ensures each lecture gets its own _id
+  { _id: true }
 )
+
+// const lectureSchema = new Schema<ILecture>(
+//   {
+//     title: { type: String, required: true },
+//     videoUrl: { type: String, required: true },
+//     duration: { type: Number },
+//     isFreePreview: { type: Boolean, default: false },
+//     description: { type: String },
+//     resourceUrl: { type: String },
+//   },
+//   { _id: true } // ensures each lecture gets its own _id
+// )
 
 const sectionSchema = new Schema<ISection>(
   {

@@ -15,6 +15,7 @@ import {
   getLectureById,
   updateLectureById,
   updateSectionByIdController,
+  markLectureAsCompleted,
 } from './course.controller'
 import { requireRole } from '../../middlewares/roleMiddleware'
 import authMiddleware from '../../middlewares/authMiddleware'
@@ -28,6 +29,7 @@ router.post(
   authMiddleware,
   requireRole(['admin', 'instructor']),
   upload.any(),
+
   createCourse
 )
 
@@ -57,14 +59,6 @@ router.delete(
 // Get single course (basic info)
 router.get('/:id', getSingleCourse)
 
-// Update Course
-// router.patch(
-//   '/:id',
-//   authMiddleware,
-//   requireRole(['admin', 'instructor']),
-//   updateCourse
-// )
-// Update Course with optional thumbnail
 router.put(
   '/:courseId',
   authMiddleware,
@@ -96,17 +90,14 @@ router.post(
 router.post(
   '/:courseId/sections/:sectionId/lectures',
   authMiddleware,
-  upload.single('video'), // 'video' must match formData field name
+  // upload.any(),
   // requireRole(['admin', 'instructor']),
+  upload.fields([
+    { name: 'video', maxCount: 1 },
+    { name: 'resourceFiles', maxCount: 10 }, // Dynamic resource handling
+  ]),
   addLectureToSection
 )
-
-// router.post(
-//   '/:courseId/sections/:sectionId/lectures',
-//   // upload.single('video'), // ✅ form field name must be 'video'
-//   upload.any(),
-//   addLectureToSection
-// )
 
 // GET specific lecture
 router.get(
@@ -123,7 +114,7 @@ router.put(
   requireRole(['instructor', 'admin']),
   upload.fields([
     { name: 'video', maxCount: 1 },
-    { name: 'resource', maxCount: 1 },
+    { name: 'resourceFiles', maxCount: 10 }, // নতুন আপডেটেড ভার্সন
   ]),
   updateLectureById
 )
@@ -134,6 +125,12 @@ router.put(
   requireRole(['instructor', 'admin']),
   upload.fields([{ name: 'resourceFile', maxCount: 1 }]),
   updateSectionByIdController
+)
+
+router.put(
+  '/lectures/:lectureId/complete',
+  authMiddleware,
+  markLectureAsCompleted
 )
 
 export default router
