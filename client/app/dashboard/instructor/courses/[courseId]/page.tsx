@@ -94,7 +94,7 @@ export default function EditCoursePage() {
       )
 
       toast.success('Course updated successfully!')
-      router.push(`/dashboard/instructor/my-courses`)
+      router.push(`/dashboard/instructor/courses`)
     } catch (error) {
       console.error(error)
       toast.error('Failed to update course')

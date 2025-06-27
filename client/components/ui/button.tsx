@@ -4,7 +4,13 @@ import { cn } from 'lib/utils'
 import { ButtonHTMLAttributes, forwardRef } from 'react'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'destructive'
+  variant?:
+    | 'default'
+    | 'outline'
+    | 'ghost'
+    | 'destructive'
+    | 'success'
+    | 'warning'
   size?: 'sm' | 'md' | 'lg'
 }
 

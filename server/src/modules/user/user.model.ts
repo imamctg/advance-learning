@@ -107,6 +107,8 @@ export const USER_ROLES = [
 export type UserRole = (typeof USER_ROLES)[number]
 
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId
+
   name: string
   email: string
   password: string

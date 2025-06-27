@@ -1,10 +1,22 @@
 // course.controller.ts
 import { Request, Response } from 'express'
-import Course, { ICourse, ILecture, ISection } from './course.model'
-import mongoose from 'mongoose'
+import Course, {
+  COURSE_STATUSES,
+  CourseStatus,
+  IAdminNote,
+  IChangeRequest,
+  ICourse,
+  ILecture,
+  INoteResponse,
+  ISection,
+  IUserRef,
+} from './course.model'
+import mongoose, { Types } from 'mongoose'
 import * as courseService from './course.service'
 import { uploadToCloudinary } from '../../utils/cloudinaryUpload'
 import { getCloudinaryVideoDuration } from '../../utils/getCloudinaryVideoDuration'
+import User, { IUser } from '../user/user.model'
+// import { IUser } from '../user/user.model'
 
 // ✅ Create Course
 export const createCourse = async (req: Request, res: Response) => {
@@ -28,9 +40,28 @@ export const createCourse = async (req: Request, res: Response) => {
   }
 }
 
+// export const getAllCourses = async (req: Request, res: Response) => {
+//   try {
+//     const courses = await Course.find()
+//     res.status(200).json({ success: true, data: courses })
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ success: false, message: 'Failed to fetch courses', error })
+//   }
+// }
+
 export const getAllCourses = async (req: Request, res: Response) => {
   try {
-    const courses = await Course.find()
+    const { status } = req.query // কুয়েরি প্যারামিটার থেকে status নেওয়া
+    console.log(status)
+    // ফিল্টার অবজেক্ট তৈরি
+    const filter: any = {}
+    if (status) {
+      filter.status = status
+    }
+    console.log(filter, 'filter')
+    const courses = await Course.find(filter) // ফিল্টার ব্যবহার করে কোর্স খোঁজা
     res.status(200).json({ success: true, data: courses })
   } catch (error) {
     res
@@ -87,13 +118,71 @@ export const deleteCourse = async (
   }
 }
 
+// export const getCourseById = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   const course = await Course.findById(req.params.courseId)
+//   if (!course) return res.status(404).json({ message: 'Not found' })
+//   res.json(course)
+// }
+
+// export const getInstructorStudents = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     console.log(req.user, 'controller .....')
+//     if (!req.user?._id) {
+//       return res.status(401).json({ success: false, message: 'Unauthorized' })
+//     }
+
+//     // const instructorId = new mongoose.Types.ObjectId(req.user._id.toString())
+//     const instructorId = mongoose.Types.ObjectId.createFromHexString(
+//       req.user._id.toString()
+//     )
+//     const students = await courseService.getStudentsByInstructor(instructorId)
+
+//     res.status(200).json({
+//       success: true,
+//       data: students,
+//     })
+//   } catch (error) {
+//     console.error('Error in getInstructorStudents:', error)
+//     res.status(500).json({
+//       success: false,
+//       message:
+//         error instanceof Error ? error.message : 'Failed to fetch students',
+//       error: process.env.NODE_ENV === 'development' ? error : undefined,
+//     })
+//   }
+// }
 export const getCourseById = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  const course = await Course.findById(req.params.courseId)
-  if (!course) return res.status(404).json({ message: 'Not found' })
-  res.json(course)
+  try {
+    const course = await Course.findById(req.params.courseId)
+      .populate('instructor', 'name email')
+      .populate('sections.lectures.resources')
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found',
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      data: course,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch course details',
+    })
+  }
 }
 
 export const getInstructorCourses = async (
@@ -797,6 +886,585 @@ export const markLectureAsCompleted = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to mark lecture as completed',
+    })
+  }
+}
+
+// ====================== NEW STATUS MANAGEMENT CONTROLLERS ======================
+
+/**
+ * @desc    Submit course for admin review
+ * @route   POST /api/courses/:courseId/submit
+ * @access  Instructor (course owner)
+ */
+export const submitCourseForReview = async (req: Request, res: Response) => {
+  try {
+    const course = await courseService.submitCourseForReview(
+      req.params.courseId,
+      req.user._id // Assuming you have authentication middleware
+    )
+
+    res.status(200).json({
+      success: true,
+      message: 'Course submitted for admin review',
+      data: course,
+    })
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to submit course for review',
+    })
+  }
+}
+
+/**
+ * @desc    Admin reviews a course
+ * @route   POST /api/courses/:courseId/review
+ * @access  Admin
+ */
+// export const reviewCourse = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const { decision, notes } = req.body
+
+//     const validDecisions = ['approved', 'rejected', 'changes_requested']
+//     if (!validDecisions.includes(decision)) {
+//       return res.status(400).json({
+//         success: false,
+//         message:
+//           'Invalid decision. Must be one of: approved, rejected, changes_requested',
+//       })
+//     }
+// // Update course status
+//     const course = await courseService.reviewCourseByAdmin(
+//       req.params.courseId,
+//       req.user._id, // Admin ID
+//       decision as 'approved' | 'rejected' | 'changes_requested',
+//       notes
+//     )
+
+//     res.status(200).json({
+//       success: true,
+//       message: `Course ${decision}`,
+//       data: course,
+//     })
+//   } catch (error: any) {
+//     res.status(400).json({
+//       success: false,
+//       message: error.message || 'Failed to review course',
+//     })
+//   }
+// }
+
+// export const reviewCourse = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const { decision, notes } = req.body
+//     const { courseId } = req.params
+//     const adminId = req.user._id // From auth middleware
+
+//     // Validate decision
+//     const validDecisions = ['approved', 'rejected', 'changes_requested']
+//     if (!validDecisions.includes(decision)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Invalid decision value',
+//       })
+//     }
+
+//     // Update course status
+//     const course = await Course.findByIdAndUpdate(
+//       courseId,
+//       {
+//         status: decision,
+//         adminNotes: notes,
+//         reviewedBy: adminId,
+//         reviewedAt: new Date(),
+//       },
+//       { new: true }
+//     )
+
+//     if (!course) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Course not found',
+//       })
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: `Course ${decision}`,
+//       data: course,
+//     })
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to review course',
+//     })
+//   }
+// }
+
+export const reviewCourse = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { decision, notes } = req.body
+    const { courseId } = req.params
+    const adminId = req.user._id // From auth middleware
+
+    // Validate decision
+    const validDecisions = ['approved', 'rejected', 'changes_requested']
+    if (!validDecisions.includes(decision)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid decision value',
+      })
+    }
+
+    // Create new admin note object
+    const newAdminNote = {
+      adminId,
+      note: notes,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    // Update course status and add note
+    const course = await Course.findByIdAndUpdate(
+      courseId,
+      {
+        $set: {
+          status: decision,
+          lastReviewedAt: new Date(),
+          lastReviewedBy: adminId,
+        },
+        $push: {
+          adminNotes: newAdminNote,
+        },
+      },
+      { new: true }
+    )
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found',
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Course ${decision}`,
+      data: course,
+    })
+  } catch (error) {
+    console.error('Error reviewing course:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to review course',
+    })
+  }
+}
+
+/**
+ * @desc    Publish an approved course
+ * @route   POST /api/courses/:courseId/publish
+ * @access  Instructor (course owner)
+ */
+export const publishCourse = async (req: Request, res: Response) => {
+  console.log(req.user, req.params, 'user')
+  try {
+    const course = await courseService.publishCourse(
+      req.params.courseId,
+      req.user.id
+    )
+
+    res.status(200).json({
+      success: true,
+      message: 'Course published successfully',
+      data: course,
+    })
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to publish course',
+    })
+  }
+}
+
+/**
+ * @desc    Archive a course
+ * @route   POST /api/courses/:courseId/archive
+ * @access  Instructor (course owner) or Admin
+ */
+export const archiveCourse = async (req: Request, res: Response) => {
+  try {
+    const isAdmin = req.user.role === 'admin' // Assuming role is in user object
+    const course = await courseService.archiveCourse(
+      req.params.courseId,
+      req.user._id,
+      isAdmin
+    )
+
+    res.status(200).json({
+      success: true,
+      message: 'Course archived successfully',
+      data: course,
+    })
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to archive course',
+    })
+  }
+}
+
+/**
+ * @desc    Get courses by status (for admin dashboard)
+ * @route   GET /api/courses/status/:status
+ * @access  Admin
+ */
+
+export const getCoursesByStatus = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { status } = req.params
+
+    // Validate status
+    if (!COURSE_STATUSES.includes(status as CourseStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status',
+      })
+    }
+
+    // Fetch courses with proper population
+    const courses = await Course.find({ status })
+      .populate('instructor', 'name email') // Properly populate instructor info
+      .select('title instructor price status createdAt') // Select only needed fields
+      .sort({ createdAt: -1 })
+
+    res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses.map((course) => ({
+        ...course.toObject(),
+        price: course.price.toFixed(2), // Format price
+      })),
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch courses by status',
+    })
+  }
+}
+
+// First, define interfaces for your note types
+interface AdminNote {
+  note: string
+  createdAt: Date
+  adminId: Types.ObjectId
+}
+
+interface ChangeRequest {
+  message: string
+  createdAt: Date
+  adminId: Types.ObjectId
+}
+
+// course.controller.ts
+export const getAdminNotes = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const course = await Course.findById(req.params.courseId)
+      .select('adminNotes changeRequests')
+      .populate('adminNotes.adminId changeRequests.adminId', 'name email')
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' })
+    }
+
+    // Combine all notes and requests
+    const allNotes = [
+      ...course.adminNotes.map((note: any) => ({
+        type: 'note',
+        note: note.note,
+        responseNote: note.responseNote,
+        createdAt: note.createdAt,
+        updatedAt: note.updatedAt,
+        admin: note.adminId,
+      })),
+      ...course.changeRequests.map((request: any) => ({
+        type: 'request',
+        message: request.message,
+        responseNote: request.responseNote,
+        createdAt: request.createdAt,
+        updatedAt: request.updatedAt,
+        admin: request.adminId,
+      })),
+    ]
+
+    res.status(200).json(allNotes)
+  } catch (error) {
+    console.error('Error fetching admin notes:', error)
+    res.status(500).json({ message: 'Failed to fetch notes' })
+  }
+}
+// course.controller.ts
+// export const resubmitCourse = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const { courseId } = req.params
+//     const { responseNote } = req.body
+//     const instructorId = req.user._id
+
+//     const course = await Course.findOneAndUpdate(
+//       {
+//         _id: courseId,
+//         instructor: instructorId,
+//         status: 'changes_requested',
+//       },
+//       {
+//         $set: {
+//           status: 'under_review',
+//           lastReviewedAt: new Date(),
+//         },
+//         $push: {
+//           adminNotes: {
+//             adminId: instructorId, // Instructor is responding
+//             note: 'Instructor response to changes',
+//             responseNote: responseNote,
+//             createdAt: new Date(),
+//             updatedAt: new Date(),
+//           },
+//         },
+//       },
+//       { new: true }
+//     )
+
+//     if (!course) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Course not found or not in changes_requested state',
+//       })
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: 'Course resubmitted for review',
+//       data: {
+//         status: course.status,
+//         adminNotes: course.adminNotes,
+//       },
+//     })
+//   } catch (error: any) {
+//     console.error('Error resubmitting course:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to resubmit course',
+//       error: error.message,
+//     })
+//   }
+// }
+
+export const resubmitCourse = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { courseId } = req.params
+    const { responseNote } = req.body
+    const instructorId = req.user._id
+
+    // Find the course
+    const course = await Course.findOne({
+      _id: courseId,
+      instructor: instructorId,
+      status: 'changes_requested',
+    })
+
+    if (!course) {
+      return res.status(400).json({
+        success: false,
+        message: 'Course not found or not in changes_requested state',
+      })
+    }
+
+    // Add response to the latest admin note or change request
+    if (course.adminNotes.length > 0) {
+      const lastNote = course.adminNotes[course.adminNotes.length - 1]
+      lastNote.responseNote = responseNote
+      lastNote.updatedAt = new Date()
+    } else if (course.changeRequests.length > 0) {
+      const lastRequest =
+        course.changeRequests[course.changeRequests.length - 1]
+      lastRequest.responseNote = responseNote
+      lastRequest.updatedAt = new Date()
+    }
+
+    // Update course status
+    course.status = 'under_review'
+    await course.save()
+
+    res.status(200).json({
+      success: true,
+      message: 'Course resubmitted for review',
+      data: course,
+    })
+  } catch (error) {
+    console.error('Error resubmitting course:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to resubmit course',
+    })
+  }
+}
+
+// export const getMyCourseStudents = async (req: Request, res: Response) => {
+//   try {
+//     const instructorId = req.user.id
+//     console.log('Instructor ID:', instructorId)
+//     const students = await courseService.getStudentsOfInstructorCourses(
+//       instructorId
+//     )
+//     res.status(200).json({ students })
+//   } catch (error) {
+//     console.error('Error fetching students:', error)
+//     res.status(500).json({ message: 'Server error while fetching students.' })
+//   }
+// }
+
+// export const getMyCourseStudents = async (req: Request, res: Response) => {
+//   try {
+//     const instructorId = req.user._id // req.user.id নয়, req.user._id ব্যবহার করুন
+//     console.log('Instructor ID:', instructorId)
+
+//     const students = await courseService.getStudentsOfInstructorCourses(
+//       instructorId.toString() // ObjectId কে স্ট্রিং-এ কনভার্ট করুন
+//     )
+
+//     res.status(200).json({
+//       success: true,
+//       students,
+//     })
+//   } catch (error) {
+//     console.error('Error fetching students:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error while fetching students.',
+//     })
+//   }
+// }
+
+// export const getMyCourseStudents = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     // প্রথমে নিশ্চিত করুন req.user সঠিকভাবে পপুলেটেড হয়েছে
+//     if (!req.user || !req.user._id) {
+//       return res.status(401).json({
+//         success: false,
+//         message: 'Unauthorized: User not authenticated',
+//       })
+//     }
+//     const instructorId = req.user._id || req.user.id // উভয় ক্ষেত্রে কাজ করবে
+//     console.log('Instructor ID:', instructorId)
+
+//     const students = await courseService.getStudentsOfInstructorCourses(
+//       instructorId.toString()
+//     )
+
+//     res.status(200).json({
+//       success: true,
+//       students,
+//     })
+//   } catch (error: any) {
+//     console.error('Error fetching students:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error while fetching students.',
+//       error: error.message, // ডিবাগিং এর জন্য এরর মেসেজ যোগ করুন
+//     })
+//   }
+// }
+
+// export const getMyCourseStudents = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     if (!req.user || !req.user._id) {
+//       return res.status(401).json({
+//         success: false,
+//         message: 'User not authenticated',
+//       })
+//     }
+
+//     console.log('Authenticated User:', req.user) // ডিবাগিং লগ
+
+//     const instructorId = req.user._id // mongoose ObjectId
+//     const students = await courseService.getStudentsOfInstructorCourses(
+//       instructorId.toString()
+//     )
+
+//     res.status(200).json({
+//       success: true,
+//       students,
+//     })
+//   } catch (error) {
+//     console.error('Error in getMyCourseStudents:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error',
+//       error: error instanceof Error ? error.message : 'Unknown error',
+//     })
+//   }
+// }
+
+export const getMyCourseStudents = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const instructorId = req.user._id // authMiddleware থেকে প্রাপ্ত
+
+    // 1. প্রথমে ইনস্ট্রাক্টরের কোর্সগুলো খুঁজুন
+    const courses = await Course.find({ instructor: instructorId })
+
+    if (!courses.length) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'No courses found' })
+    }
+
+    // 2. সকল স্টুডেন্ট আইডি সংগ্রহ করুন
+    const studentIds = courses.flatMap((course) => course.students)
+
+    // 3. স্টুডেন্ট ডিটেইলস পপুলেট করুন
+    const students = await User.find({
+      _id: { $in: studentIds },
+    }).select('name email role profileImage')
+
+    res.status(200).json({ success: true, students })
+  } catch (error: any) {
+    console.error('Error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message,
     })
   }
 }

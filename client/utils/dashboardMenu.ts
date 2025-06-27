@@ -40,13 +40,50 @@ export const menuByRole: Record<
       icon: FaTachometerAlt,
     },
     {
-      name: 'Courses',
+      name: 'Course Review',
       icon: FaBook,
       subItems: [
-        { name: 'All Courses', href: '/dashboard/admin/courses' },
         {
-          name: 'Create Course',
-          href: '/dashboard/admin/courses/create-course',
+          name: 'Review Queue',
+          href: '/dashboard/admin/courses/review',
+          subItems: [
+            {
+              name: 'Pending Review',
+              href: '/dashboard/admin/courses?status=under_review',
+            },
+            {
+              name: 'Changes Requested',
+              href: '/dashboard/admin/courses?status=changes_requested',
+            },
+          ],
+        },
+        {
+          name: 'Approved Courses',
+          href: '/dashboard/admin/courses/approved',
+          subItems: [
+            {
+              name: 'All Approved',
+              href: '/dashboard/admin/courses?status=approved',
+            },
+            {
+              name: 'Published',
+              href: '/dashboard/admin/courses?status=published',
+            },
+          ],
+        },
+        {
+          name: 'Management',
+          subItems: [
+            { name: 'All Courses', href: '/dashboard/admin/courses' },
+            {
+              name: 'Rejected',
+              href: '/dashboard/admin/courses?status=rejected',
+            },
+            {
+              name: 'Archived',
+              href: '/dashboard/admin/courses?status=archived',
+            },
+          ],
         },
       ],
     },
@@ -106,9 +143,60 @@ export const menuByRole: Record<
       icon: FaTachometerAlt,
     },
     {
-      name: 'My Courses',
-      href: '/dashboard/instructor/my-courses',
+      name: 'Course Manager',
       icon: FaBook,
+      subItems: [
+        {
+          name: 'My Courses',
+          href: '/dashboard/instructor/courses',
+          subItems: [
+            { name: 'All Courses', href: '/dashboard/instructor/courses' },
+            {
+              name: 'Drafts',
+              href: '/dashboard/instructor/courses?status=draft',
+            },
+            {
+              name: 'Under Review',
+              href: '/dashboard/instructor/courses?status=under_review',
+            },
+            {
+              name: 'Changes Needed',
+              href: '/dashboard/instructor/courses?status=changes_requested',
+            },
+          ],
+        },
+        {
+          name: 'Approved Courses',
+          href: '/dashboard/instructor/courses/approved',
+          subItems: [
+            {
+              name: 'Ready to Publish',
+              href: '/dashboard/instructor/courses?status=approved',
+            },
+            {
+              name: 'Published',
+              href: '/dashboard/instructor/courses?status=published',
+            },
+          ],
+        },
+        {
+          name: 'Actions',
+          subItems: [
+            {
+              name: 'Create New',
+              href: '/dashboard/instructor/courses/create',
+            },
+            {
+              name: 'Archived',
+              href: '/dashboard/instructor/courses?status=archived',
+            },
+            {
+              name: 'Rejected',
+              href: '/dashboard/instructor/courses?status=rejected',
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'Content',

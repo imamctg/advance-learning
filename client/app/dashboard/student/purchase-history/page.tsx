@@ -1,4 +1,4 @@
-// app/dashboard/user/purchase-history/page.tsx
+// app/dashboard/student/purchase-history/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -10,10 +10,11 @@ interface Course {
   _id: string
   title: string
 }
+
 interface Purchase {
   _id: string
-  courseId: Course
-  courseTitle: string
+  courseId: Course | null // Updated to allow null
+  courseTitle?: string // Optional field
   paymentType: string
   amount: number
   status: string
@@ -34,7 +35,6 @@ export default function PurchaseHistoryPage() {
           `http://localhost:5000/api/orders/${user.id}`
         )
         setPurchases(res.data)
-        // console.log(res.data, 'res.data')
       } catch (err) {
         console.error('Failed to fetch purchases', err)
       } finally {
@@ -68,8 +68,9 @@ export default function PurchaseHistoryPage() {
             <tbody className='text-sm md:text-base text-gray-800 divide-y'>
               {purchases.map((item) => (
                 <tr key={item._id} className='hover:bg-gray-50'>
-                  <td className='p-3'>{item.courseId.title}</td>
-
+                  <td className='p-3'>
+                    {item.courseId?.title || 'Course not available'}
+                  </td>
                   <td className='p-3 capitalize'>{item.paymentType}</td>
                   <td className='p-3 font-semibold'>${item.amount}</td>
                   <td className='p-3'>

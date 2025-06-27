@@ -9,7 +9,11 @@ const CoursesList = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/courses')
+      .get('http://localhost:5000/api/courses', {
+        params: {
+          status: 'published', // ফিল্টার প্যারামিটার যোগ করুন
+        },
+      })
       .then((res) => setCourses(res.data.data))
       .catch((err) => console.error(err))
   }, [])
@@ -17,7 +21,7 @@ const CoursesList = () => {
   const handleEnroll = (courseId: string) => {
     router.push(`/courses/${courseId}`)
   }
-
+  console.log(courses, 'courses')
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 py-8'>
       {courses.map((course: any) => (

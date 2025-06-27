@@ -16,7 +16,8 @@ export const createNewOrder = async (orderData: {
     amount: orderData.amount,
     paymentType: orderData.paymentType,
     transactionId: orderData.transactionId,
-    status: 'pending',
+    // status: 'pending',
+    status: 'paid',
     receiptUrl: orderData.receiptUrl,
   })
 
