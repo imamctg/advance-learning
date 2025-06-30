@@ -3,8 +3,15 @@ import { initiateSSLCommerzPayment } from './payment.service'
 
 export const initiatePayment = async (req: Request, res: Response) => {
   try {
-    const { amount, courseTitle, userEmail, userId, courseId, transactionId } =
-      req.body
+    const {
+      amount,
+      courseTitle,
+      userEmail,
+      userId,
+      courseId,
+      orderId,
+      transactionId,
+    } = req.body
     console.log(
       'payment-controller',
       amount,
@@ -20,6 +27,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
       userEmail,
       userId,
       courseId,
+      orderId,
       transactionId,
     })
 

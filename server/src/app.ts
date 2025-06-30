@@ -10,6 +10,8 @@ import orderRoutes from './modules/order/order.routes'
 import certificateRoutes from './modules/certificate/certificate.route'
 import quizRoutes from './modules/quiz/quiz.routes'
 import dotenv from 'dotenv'
+import e from 'express'
+import { EarningsRoutes } from './modules/earnings/earnings.routes'
 
 dotenv.config()
 
@@ -33,6 +35,7 @@ app.use('/api/orders', orderRoutes)
 app.use('/api/instructor', courseRoutes)
 app.use('/api/instructor', quizRoutes)
 app.use('/api/quizzes', quizRoutes)
+app.use('/api/earnings', EarningsRoutes)
 
 app.use('/api', certificateRoutes)
 

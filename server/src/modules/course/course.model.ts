@@ -321,6 +321,8 @@ export interface INoteResponse {
 }
 
 export interface ICourse extends Document {
+  _id: Types.ObjectId
+
   title: string
   description: string
   price: number

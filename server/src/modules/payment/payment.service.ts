@@ -16,11 +16,19 @@ interface PaymentPayload {
   userId: string
   courseId: string
   transactionId: string
+  orderId: string
 }
 
 export const initiateSSLCommerzPayment = async (payload: PaymentPayload) => {
-  const { amount, courseTitle, userEmail, userId, courseId, transactionId } =
-    payload
+  const {
+    amount,
+    courseTitle,
+    userEmail,
+    userId,
+    courseId,
+    transactionId,
+    orderId,
+  } = payload
   console.log(
     'payment-service',
     amount,
@@ -35,7 +43,7 @@ export const initiateSSLCommerzPayment = async (payload: PaymentPayload) => {
     currency: 'BDT',
     tran_id: transactionId,
     // success_url: `http://localhost:3000/payment/success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}`,
-    success_url: `http://localhost:5000/api/payment-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}`,
+    success_url: `http://localhost:5000/api/payment-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
 
     fail_url: 'http://localhost:3000/payment/fail',
     cancel_url: 'http://localhost:3000/payment/cancel',

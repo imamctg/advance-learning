@@ -1279,6 +1279,60 @@ export const getAdminNotes = async (
 //   }
 // }
 
+// export const resubmitCourse = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     console.log('Resubmitting course...')
+//     const { courseId } = req.params
+//     const { responseNote } = req.body
+//     const instructorId = req.user._id
+
+//     // Find the course
+//     const course = await Course.findOne({
+//       _id: courseId,
+//       instructor: instructorId,
+//       status: 'changes_requested',
+//     })
+
+//     if (!course) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Course not found or not in changes_requested state',
+//       })
+//     }
+
+//     // Add response to the latest admin note or change request
+//     if (course.adminNotes.length > 0) {
+//       const lastNote = course.adminNotes[course.adminNotes.length - 1]
+//       lastNote.responseNote = responseNote
+//       lastNote.updatedAt = new Date()
+//     } else if (course.changeRequests.length > 0) {
+//       const lastRequest =
+//         course.changeRequests[course.changeRequests.length - 1]
+//       lastRequest.responseNote = responseNote
+//       lastRequest.updatedAt = new Date()
+//     }
+
+//     // Update course status
+//     course.status = 'under_review'
+//     await course.save()
+
+//     res.status(200).json({
+//       success: true,
+//       message: 'Course resubmitted for review',
+//       data: course,
+//     })
+//   } catch (error) {
+//     console.error('Error resubmitting course:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to resubmit course',
+//     })
+//   }
+// }
+
 export const resubmitCourse = async (
   req: Request,
   res: Response
@@ -1302,29 +1356,50 @@ export const resubmitCourse = async (
       })
     }
 
-    // Add response to the latest admin note or change request
-    if (course.adminNotes.length > 0) {
-      const lastNote = course.adminNotes[course.adminNotes.length - 1]
-      lastNote.responseNote = responseNote
-      lastNote.updatedAt = new Date()
-    } else if (course.changeRequests.length > 0) {
-      const lastRequest =
-        course.changeRequests[course.changeRequests.length - 1]
-      lastRequest.responseNote = responseNote
-      lastRequest.updatedAt = new Date()
+    // Clean up any invalid admin notes (those missing required fields)
+    course.adminNotes = course.adminNotes.filter(
+      (note: IAdminNote) => note && note.note && note.note.trim() !== ''
+    )
+
+    // Create a new properly structured admin note
+    const newAdminNote = {
+      adminId: instructorId,
+      note: 'Instructor response to review feedback',
+      responseNote: responseNote,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
-    // Update course status
+    // Update course status and add new note
     course.status = 'under_review'
+    course.adminNotes.push(newAdminNote)
+    course.lastReviewedAt = new Date()
+    course.lastReviewedBy = instructorId
+
+    // Validate before saving
+    await course.validate()
+
     await course.save()
 
     res.status(200).json({
       success: true,
       message: 'Course resubmitted for review',
-      data: course,
+      data: {
+        status: course.status,
+        lastReviewedAt: course.lastReviewedAt,
+      },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error resubmitting course:', error)
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed: ' + error.message,
+        errors: error.errors,
+      })
+    }
+
     res.status(500).json({
       success: false,
       message: 'Failed to resubmit course',

@@ -3,7 +3,6 @@
 import '/lib/i18n'
 import { useTranslation } from 'react-i18next'
 import { Download } from 'lucide-react'
-import { useEarnings } from 'hooks/useEarnings'
 import { Button } from 'components/ui/button'
 import { Card, CardContent } from 'components/ui/card'
 import { Badge } from 'components/ui/badge'
@@ -15,42 +14,48 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import { useEarnings } from 'hooks/useEarnings'
 
-const dummyData = {
-  total: 1234.56,
-  monthly: 234.56,
-  pending: 100.0,
-  chart: [
-    { month: 'Jan', earnings: 100 },
-    { month: 'Feb', earnings: 150 },
-    { month: 'Mar', earnings: 200 },
-    { month: 'Apr', earnings: 250 },
-    { month: 'May', earnings: 300 },
-    { month: 'Jun', earnings: 234.56 },
-  ],
-  history: [
-    {
-      date: '2025-05-01',
-      amount: 120,
-      status: 'Paid',
-      method: 'Bkash',
-    },
-    {
-      date: '2025-04-15',
-      amount: 100,
-      status: 'Pending',
-      method: 'Nagad',
-    },
-  ],
-}
+// ডামি ডেটা শুধু চার্ট এবং হিস্ট্রির জন্য (যদি API থেকে না পাওয়া যায়)
+const dummyChartData = [
+  { month: 'Jan', earnings: 100 },
+  { month: 'Feb', earnings: 150 },
+  { month: 'Mar', earnings: 200 },
+  { month: 'Apr', earnings: 250 },
+  { month: 'May', earnings: 300 },
+  { month: 'Jun', earnings: 234.56 },
+]
+
+const dummyHistoryData = [
+  {
+    date: '2025-05-01',
+    amount: 120,
+    status: 'Paid',
+    method: 'Bkash',
+  },
+  {
+    date: '2025-04-15',
+    amount: 100,
+    status: 'Pending',
+    method: 'Nagad',
+  },
+]
 
 export default function EarningsPage() {
   const { t } = useTranslation()
-  // const { data, isLoading, error } = useEarnings()
-  // const earnings = data ?? dummyData
+  const { data, isLoading, error } = useEarnings()
 
-  // if (isLoading) return <p className='p-6'>Loading...</p>
-  // if (error) return <p className='p-6 text-red-500'>Failed to load earnings.</p>
+  if (isLoading) return <p className='p-6'>Loading...</p>
+  if (error) return <p className='p-6 text-red-500'>Failed to load earnings.</p>
+
+  // API ডেটা এবং ডামি ডেটা মিশ্রিত করুন
+  const earningsData = {
+    total: (data as any)?.totalEarnings || 0,
+    monthly: (data as any)?.monthlyEarnings || 0, // আপনার API থেকে monthly ডেটা আনুন
+    pending: data?.pendingEarnings || 0,
+    chart: data?.chartData || dummyChartData, // API থেকে চার্ট ডেটা আনুন
+    history: data?.paymentHistory || dummyHistoryData, // API থেকে হিস্ট্রি ডেটা আনুন
+  }
 
   return (
     <div className='p-6 space-y-6'>
@@ -67,7 +72,7 @@ export default function EarningsPage() {
           <CardContent className='p-4'>
             <p className='text-sm text-gray-500'>{t('totalEarnings')}</p>
             <p className='text-2xl font-semibold text-green-600'>
-              ${dummyData?.total ?? 0}
+              ${earningsData.total.toFixed(2)}
             </p>
           </CardContent>
         </Card>
@@ -76,7 +81,7 @@ export default function EarningsPage() {
           <CardContent className='p-4'>
             <p className='text-sm text-gray-500'>{t('thisMonth')}</p>
             <p className='text-2xl font-semibold text-blue-600'>
-              ${dummyData?.monthly ?? 0}
+              ${earningsData.monthly.toFixed(2)}
             </p>
           </CardContent>
         </Card>
@@ -85,7 +90,7 @@ export default function EarningsPage() {
           <CardContent className='p-4'>
             <p className='text-sm text-gray-500'>{t('pending')}</p>
             <p className='text-2xl font-semibold text-yellow-600'>
-              ${dummyData?.pending}
+              ${earningsData.pending.toFixed(2)}
             </p>
           </CardContent>
         </Card>
@@ -94,7 +99,7 @@ export default function EarningsPage() {
       <div className='bg-white p-6 rounded-2xl shadow border'>
         <h2 className='text-lg font-semibold mb-4'>{t('monthlyEarnings')}</h2>
         <ResponsiveContainer width='100%' height={300}>
-          <BarChart data={dummyData.chart}>
+          <BarChart data={earningsData.chart}>
             <XAxis dataKey='month' />
             <YAxis />
             <Tooltip />
@@ -116,10 +121,10 @@ export default function EarningsPage() {
               </tr>
             </thead>
             <tbody>
-              {dummyData.history.map((item: any, index: number) => (
+              {earningsData.history.map((item: any, index: number) => (
                 <tr key={index} className='border-b hover:bg-gray-50'>
                   <td className='py-2 px-4'>{item.date}</td>
-                  <td className='py-2 px-4'>${item.amount}</td>
+                  <td className='py-2 px-4'>${item.amount.toFixed(2)}</td>
                   <td className='py-2 px-4'>
                     <Badge
                       variant={item.status === 'Paid' ? 'default' : 'secondary'}

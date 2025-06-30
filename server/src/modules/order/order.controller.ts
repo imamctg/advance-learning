@@ -38,7 +38,8 @@
 // order.controller.ts
 
 import { Request, Response } from 'express'
-import { createNewOrder, getOrdersByUserId } from './order.service'
+import { OrderService } from './order.service'
+// import { createNewOrder, getOrdersByUserId } from './order.service'
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
@@ -46,7 +47,7 @@ export const createOrder = async (req: Request, res: Response) => {
       req.body
     console.log('createOrder:', req.body)
 
-    const savedOrder = await createNewOrder({
+    const savedOrder = await OrderService.createNewOrder({
       userId,
       courseId,
       amount,
@@ -64,7 +65,7 @@ export const createOrder = async (req: Request, res: Response) => {
 export const getOrdersByUser = async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId
-    const orders = await getOrdersByUserId(userId)
+    const orders = await OrderService.getOrdersByUserId(userId)
     res.status(200).json(orders)
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch orders', error })

@@ -152,14 +152,14 @@ router.put(
   authMiddleware,
   markLectureAsCompleted
 )
-requireRole(['admin']),
-  // Status Management Routes
-  router.post(
-    '/:courseId/submit',
-    authMiddleware,
-    requireRole(['instructor']),
-    submitCourseForReview
-  )
+// requireRole(['admin']),
+// Status Management Routes
+router.post(
+  '/:courseId/submit',
+  authMiddleware,
+  requireRole(['instructor']),
+  submitCourseForReview
+)
 router.post(
   '/:courseId/review',
   authMiddleware,
