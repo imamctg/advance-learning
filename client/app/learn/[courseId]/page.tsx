@@ -36,63 +36,71 @@ export default function CourseDetailsPage() {
   const [initialLoad, setInitialLoad] = useState(true)
 
   // Fetch course and quizzes data
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        // Early return if missing critical data
-        if (!token || !courseId) {
-          console.log('Waiting for token or courseId...')
-          return
-        }
+        if (!token || !courseId) return
 
-        console.log('Fetching course data...')
-
-        console.log(token, courseId, 'courseId', 'token')
-
-        // Fetch course data
-        // const courseRes = await axios.get(`/api/courses/${courseId}`)
-        // const courseData = courseRes.data.data
-        // console.log(courseData, 'courseData')
-        // // Fetch quizzes for this course
-        // const quizzesRes = await axios.get(
-        //   `http://localhost:5000/api/quizzes/course/${courseId}`,
-        //   {
-        //     headers: { Authorization: `Bearer ${token}` },
-        //   }
-        // )
-
-        // const quizzesData = quizzesRes.data.quizzes || [] // ফলব্যাক হিসেবে empty array
-
-        // setCourse(courseData)
-        // setQuizzes(quizzesData)
-
-        // Fetch course data
         const [courseRes, quizzesRes] = await Promise.all([
-          axios.get(`/api/courses/${courseId}`),
+          axios.get(`http://localhost:5000/api/courses/${courseId}/details`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
           axios.get(`http://localhost:5000/api/quizzes/course/${courseId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ])
-
+        console.log(courseRes.data.data, 'courseRes.data.data')
         const courseData = courseRes.data.data
         const quizzesData = quizzesRes.data.quizzes || []
 
         setCourse(courseData)
         setQuizzes(quizzesData)
 
-        // Set first lecture as default selected
-        // if (courseData.sections?.[0]?.lectures?.[0]) {
-        //   setSelectedLecture(courseData.sections[0].lectures[0])
-        // }
+        // ✅ Restore last selected lecture from localStorage
+        const storedLectureId = localStorage.getItem(
+          `selectedLecture_${courseId}`
+        )
+        let selected: Lecture | null = null
 
-        // Set initial lecture if not already set
-        if (!selectedLecture && courseData.sections?.[0]?.lectures?.[0]) {
-          setSelectedLecture(courseData.sections[0].lectures[0])
+        if (storedLectureId) {
+          for (const section of courseData.sections) {
+            const found = section.lectures.find(
+              (lec: Lecture) => lec._id === storedLectureId
+            )
+            if (found) {
+              selected = found
+              break
+            }
+          }
         }
-      } catch (err) {
+
+        // ✅ If not found, fallback to first uncompleted lecture
+        if (!selected) {
+          outer: for (const section of courseData.sections) {
+            for (const lec of section.lectures) {
+              if (!lec.completed) {
+                selected = lec
+                break outer
+              }
+            }
+          }
+        }
+
+        // ✅ Still fallback to very first lecture if needed
+        // Replace:
+        if (!selected && courseData.sections?.[0]?.lectures?.[0]) {
+          selected = courseData.sections[0].lectures[0]
+        }
+
+        // And finally:
+        if (selected) {
+          setSelectedLecture(selected)
+        }
+      } catch (err: any) {
         console.error('Error details:', err.response?.data || err.message)
         setError('Failed to load course data. Please try again.')
       } finally {
@@ -103,6 +111,14 @@ export default function CourseDetailsPage() {
     fetchData()
   }, [courseId, token])
 
+  // Fetch course and quizzes data
+
+  useEffect(() => {
+    if (selectedLecture && courseId) {
+      localStorage.setItem(`selectedLecture_${courseId}`, selectedLecture._id)
+    }
+  }, [selectedLecture, courseId])
+  console.log(selectedLecture, 'selectedLecture', courseId, 'courseId')
   // Loading and error states
   if (loading && (!course || !selectedLecture)) {
     return <FullPageLoader />
@@ -144,64 +160,12 @@ export default function CourseDetailsPage() {
     setShowQuiz(true)
   }
 
-  // Frontend
-
-  // const handleQuizSubmit = async (
-  //   score: number,
-  //   total: number,
-  //   answers: any[]
-  // ) => {
-  //   try {
-  //     const response = await axios.post(
-  //       `http://localhost:5000/api/quizzes/submit/${currentQuiz?._id}`,
-  //       {
-  //         score,
-  //         total,
-  //         courseId,
-  //         answers,
-  //       },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     )
-
-  //     if (!response.data.success) {
-  //       throw new Error(response.data.message || 'Submission failed')
-  //     }
-
-  //     setShowQuiz(false)
-  //     // Optional: Show success notification
-  //   } catch (err) {
-  //     console.error('Quiz submission error:', err)
-
-  //     // Don't show error if submission was actually successful
-  //     if (!err.response?.data?.success) {
-  //       // Show error to user
-  //     }
-  //   }
-  // }
-
   const handleQuizSubmit = async (
     score: number,
     total: number,
     answers: any[]
   ) => {
     try {
-      // const response = await axios.post(
-      //   `http://localhost:5000/api/quizzes/submit/${currentQuiz?._id}`,
-      //   {
-      //     score,
-      //     total,
-      //     courseId,
-      //     answers,
-      //     timeSpent: 0, // Add default timeSpent
-      //     quizType, // Add quizType
-      //   },
-      //   { headers: { Authorization: `Bearer ${token}` } }
-      // )
-
-      // if (!response.data.success) {
-      //   throw new Error(response.data.message || 'Submission failed')
-      // }
-
       setShowQuiz(false)
     } catch (err) {
       console.error('Quiz submission error:', err)
@@ -216,7 +180,7 @@ export default function CourseDetailsPage() {
     try {
       const response = await axios.put(
         `http://localhost:5000/api/courses/lectures/${lectureId}/complete`,
-        {},
+        { courseId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -226,6 +190,7 @@ export default function CourseDetailsPage() {
       )
 
       if (response.data.success) {
+        // Optimistically update the UI
         setCourse((prev) => {
           if (!prev) return null
           return {
@@ -240,6 +205,17 @@ export default function CourseDetailsPage() {
             })),
           }
         })
+
+        // Also update local storage to maintain state
+        localStorage.setItem(
+          `completed_lectures_${courseId}`,
+          JSON.stringify({
+            ...JSON.parse(
+              localStorage.getItem(`completed_lectures_${courseId}`) || '{}'
+            ),
+            [lectureId]: true,
+          })
+        )
       }
     } catch (err) {
       console.error('Failed to mark lecture complete:', err)

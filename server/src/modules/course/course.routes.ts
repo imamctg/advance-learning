@@ -96,7 +96,8 @@ router.get(
 )
 
 // 🔽 Course Details with Sections and Lectures
-router.get('/:courseId/details', getCourseById) // Full nested info
+router.get('/:courseId/details', authMiddleware, getCourseById) // Full nested info
+// router.get('/:courseId', authMiddleware, getCourseById)
 
 // ➕ Add Section to a Course
 router.post(

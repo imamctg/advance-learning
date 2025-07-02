@@ -9,6 +9,8 @@ import messageRoutes from './modules/message/message.routes'
 import orderRoutes from './modules/order/order.routes'
 import certificateRoutes from './modules/certificate/certificate.route'
 import quizRoutes from './modules/quiz/quiz.routes'
+import progressRoutes from './modules/progress/progress.routes'
+
 import dotenv from 'dotenv'
 import e from 'express'
 import { EarningsRoutes } from './modules/earnings/earnings.routes'
@@ -36,6 +38,7 @@ app.use('/api/instructor', courseRoutes)
 app.use('/api/instructor', quizRoutes)
 app.use('/api/quizzes', quizRoutes)
 app.use('/api/earnings', EarningsRoutes)
+app.use('/api/user', progressRoutes)
 
 app.use('/api', certificateRoutes)
 

@@ -1,5 +1,6 @@
 // course.controller.ts
 import { Request, Response } from 'express'
+
 import Course, {
   COURSE_STATUSES,
   CourseStatus,
@@ -16,6 +17,8 @@ import * as courseService from './course.service'
 import { uploadToCloudinary } from '../../utils/cloudinaryUpload'
 import { getCloudinaryVideoDuration } from '../../utils/getCloudinaryVideoDuration'
 import User, { IUser } from '../user/user.model'
+import UserProgressModel from './UserProgress.model'
+import { StatusCodes } from 'http-status-codes'
 // import { IUser } from '../user/user.model'
 
 // ✅ Create Course
@@ -157,19 +160,179 @@ export const deleteCourse = async (
 //     })
 //   }
 // }
+// export const getCourseById = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const course = await Course.findById(req.params.courseId)
+//       .populate('instructor', 'name email')
+//       .populate('sections.lectures.resources')
+
+//     if (!course) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Course not found',
+//       })
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       data: course,
+//     })
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to fetch course details',
+//     })
+//   }
+// }
+
+// import { Request, Response } from 'express'
+// import Course from './course.model'
+// import UserProgress from './UserProgress.model'
+
+// export const getCourseById = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const userId = req.user?._id || null
+
+//     const course = await Course.findById(req.params.courseId)
+//       .populate('instructor', 'name email')
+//       .populate('sections.lectures.resources')
+//       .lean()
+
+//     if (!course) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Course not found',
+//       })
+//     }
+
+//     // ✅ If user is authenticated, inject completed flags
+//     if (userId) {
+//       const completedLectures = await UserProgressModel.find({
+//         user: userId,
+//         completed: true,
+//       }).lean()
+
+//       const completedLectureIds = completedLectures.map((cl) =>
+//         cl.lecture.toString()
+//       )
+
+//       course.sections.forEach((section: any) => {
+//         section.lectures.forEach((lecture: any) => {
+//           lecture.completed = completedLectureIds.includes(
+//             lecture._id.toString()
+//           )
+//         })
+//       })
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       data: course,
+//     })
+//   } catch (error) {
+//     console.error('❌ Error fetching course:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to fetch course details',
+//     })
+//   }
+// }
+
+// export const getCourseById = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const userId = req.user?._id || null
+
+//     const course = (await Course.findById(req.params.courseId)
+//       .populate('instructor', 'name email')
+//       .populate('sections.lectures.resources')
+//       .lean()) as unknown as ICourse
+
+//     if (!course) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Course not found',
+//       })
+//     }
+
+//     if (userId) {
+//       const completedLectures = await UserProgressModel.find({
+//         user: userId,
+//         completed: true,
+//         course: req.params.courseId,
+//       }).lean()
+
+//       const completedLectureIds = completedLectures.map((cl) =>
+//         cl.lecture.toString()
+//       )
+
+//       course.sections.forEach((section) => {
+//         section.lectures.forEach((lecture) => {
+//           lecture['completed'] = completedLectureIds.includes(
+//             lecture._id.toString()
+//           )
+//         })
+//       })
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       data: course,
+//     })
+//   } catch (error) {
+//     console.error('❌ Error fetching course:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to fetch course details',
+//     })
+//   }
+// }
+
 export const getCourseById = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
-    const course = await Course.findById(req.params.courseId)
+    const userId = req.user?._id || null
+    console.log(userId, 'userIdggggggggggggggggggg')
+    const course = (await Course.findById(req.params.courseId)
       .populate('instructor', 'name email')
       .populate('sections.lectures.resources')
+      .lean()) as unknown as ICourse
 
     if (!course) {
       return res.status(404).json({
         success: false,
         message: 'Course not found',
+      })
+    }
+    console.log(userId, 'userIdkljh')
+    console.log(req.params.courseId, 'courseIdjjjj')
+    if (userId) {
+      const completedLectures = await UserProgressModel.find({
+        user: userId,
+        completed: true,
+        course: req.params.courseId,
+      }).lean()
+
+      const completedLectureIds = completedLectures.map((cl) =>
+        cl.lecture.toString()
+      )
+      console.log(completedLectureIds, 'completedLectureIds')
+      course.sections.forEach((section) => {
+        section.lectures.forEach((lecture: any) => {
+          lecture.completed = completedLectureIds.includes(
+            lecture._id.toString()
+          )
+        })
       })
     }
 
@@ -178,6 +341,7 @@ export const getCourseById = async (
       data: course,
     })
   } catch (error) {
+    console.error('❌ Error fetching course:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to fetch course details',
@@ -866,15 +1030,82 @@ export const updateSectionByIdController = async (
   res.status(200).json({ section: updatedSection })
 }
 
-export const markLectureAsCompleted = async (req: Request, res: Response) => {
-  try {
-    const { lectureId } = req.params
-    const userId = req.user._id // Make sure you have authentication middleware
+// ✅ Updated Controller Function
+// export const markLectureAsCompleted = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const { courseId } = req.body
+//     const { lectureId } = req.params
+//     const userId = req.user._id
 
-    const updatedProgress = await courseService.markLectureCompleted(
-      lectureId,
-      userId
-    )
+//     if (!courseId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Course ID is required',
+//       })
+//     }
+
+//     // ✅ courseId যুক্ত করে পাঠাও
+//     const updatedProgress = await courseService.markLectureCompleted(
+//       lectureId,
+//       userId,
+//       courseId // ✅ added
+//     )
+
+//     res.json({
+//       success: true,
+//       message: 'Lecture marked as completed',
+//       data: updatedProgress,
+//     })
+//   } catch (error: any) {
+//     console.error('Error marking lecture as completed:', error)
+//     res.status(500).json({
+//       success: false,
+//       message: error.message || 'Failed to mark lecture as completed',
+//     })
+//   }
+// }
+
+export const markLectureAsCompleted = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { courseId } = req.body
+    const { lectureId } = req.params
+    const userId = req.user._id
+
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Course ID is required',
+      })
+    }
+
+    // Check if already marked complete
+    const existingProgress = await UserProgressModel.findOne({
+      user: userId,
+      lecture: lectureId,
+      course: courseId,
+    })
+
+    if (existingProgress) {
+      return res.status(200).json({
+        success: true,
+        message: 'Lecture already marked as completed',
+      })
+    }
+
+    // Create new progress record
+    const updatedProgress = await UserProgressModel.create({
+      user: userId,
+      lecture: lectureId,
+      course: courseId,
+      completed: true,
+      completedAt: new Date(),
+    })
 
     res.json({
       success: true,
@@ -891,6 +1122,49 @@ export const markLectureAsCompleted = async (req: Request, res: Response) => {
 }
 
 // ====================== NEW STATUS MANAGEMENT CONTROLLERS ======================
+
+// In your lecture controller
+// export const markLectureAsCompleted = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const { lectureId } = req.params
+//     const userId = req.user.userId
+
+//     // Check if already marked complete
+//     const existingProgress = await UserProgressModel.findOne({
+//       user: userId,
+//       lecture: lectureId,
+//     })
+
+//     if (existingProgress) {
+//       return res.status(StatusCodes.OK).json({
+//         success: true,
+//         message: 'Lecture already marked as completed',
+//       })
+//     }
+
+//     // Create new progress record
+//     await UserProgressModel.create({
+//       user: userId,
+//       lecture: lectureId,
+//       completed: true,
+//       completedAt: new Date(),
+//     })
+
+//     res.status(StatusCodes.OK).json({
+//       success: true,
+//       message: 'Lecture marked as completed',
+//     })
+//   } catch (error) {
+//     console.error('Error marking lecture complete:', error)
+//     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+//       success: false,
+//       message: 'Error marking lecture as completed',
+//     })
+//   }
+// }
 
 /**
  * @desc    Submit course for admin review
