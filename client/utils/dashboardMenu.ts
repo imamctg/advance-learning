@@ -206,10 +206,10 @@ export const menuByRole: Record<
           name: 'Curriculum',
           href: '/dashboard/instructor/content/curriculum',
         },
-        {
-          name: 'Videos & Files',
-          href: '/dashboard/instructor/content/videos-&-files',
-        },
+        // {
+        //   name: 'Videos & Files',
+        //   href: '/dashboard/instructor/content/videos-&-files',
+        // },
         {
           name: 'Quizzes',
           href: '/dashboard/instructor/content/quizzes',
@@ -246,24 +246,15 @@ export const menuByRole: Record<
       icon: FaInbox,
     },
     {
-      name: 'Settings',
+      name: 'Account Settings',
       icon: FaCog,
-      subItems: [
-        {
-          name: 'Profile',
-          href: '/dashboard/instructor/profile',
-        },
-        {
-          name: 'Account',
-          href: '/dashboard/instructor/account',
-        },
-      ],
+      href: '/dashboard/instructor/account-settings',
     },
-    {
-      name: 'Support',
-      href: '/dashboard/instructor/support',
-      icon: FaLifeRing,
-    },
+    // {
+    //   name: 'Support',
+    //   href: '/dashboard/instructor/support',
+    //   icon: FaLifeRing,
+    // },
   ],
   moderator: [],
   developer: [],

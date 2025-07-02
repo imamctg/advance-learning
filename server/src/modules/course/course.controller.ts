@@ -360,9 +360,10 @@ export const getInstructorCourses = async (
         .status(400)
         .json({ success: false, message: 'Invalid instructor ID' })
     }
-    const courses = await Course.find({ instructor: instructorId }).sort({
-      createdAt: -1,
-    })
+    const courses = await Course.find({ instructor: instructorId })
+      .populate('students', '_id') // ✅ শুধু ID বা name/email দিতে পারো
+      .sort({ createdAt: -1 })
+    console.log(courses, 'courses')
     res.status(200).json({ success: true, courses })
   } catch (error) {
     console.error('❌ Error in getInstructorCourses:', error)

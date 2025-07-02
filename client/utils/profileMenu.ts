@@ -24,11 +24,11 @@ export interface ProfileMenuItem {
 
 export const getProfileMenuByRole = (role: string): ProfileMenuItem[] => {
   const commonItems = [
-    {
-      name: 'My Profile',
-      href: `/dashboard/${role}/profile`,
-      icon: FaUser,
-    },
+    // {
+    //   name: 'My Profile',
+    //   href: `/dashboard/${role}/profile`,
+    //   icon: FaUser,
+    // },
     {
       name: 'Account Settings',
       href: `/dashboard/${role}/account-settings`,
