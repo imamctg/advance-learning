@@ -10,10 +10,13 @@ import orderRoutes from './modules/order/order.routes'
 import certificateRoutes from './modules/certificate/certificate.route'
 import quizRoutes from './modules/quiz/quiz.routes'
 import progressRoutes from './modules/progress/progress.routes'
+import contactRoutes from './modules/contact/contact.routes'
 
 import dotenv from 'dotenv'
 import e from 'express'
 import { EarningsRoutes } from './modules/earnings/earnings.routes'
+import { rateLimiter } from './middlewares/rateLimiter.middleware'
+import helmet from 'helmet'
 
 dotenv.config()
 
@@ -21,7 +24,12 @@ const app = express()
 
 // Middleware
 app.use(cors())
+// app.use(helmet())
 app.use(express.json())
+
+// app.use(express.urlencoded({ extended: true })) // ✅ এটি ফর্মডেটা পার্স করবে
+
+// app.use(rateLimiter)
 
 // Routes
 app.use('/api/auth', authRoutes)
@@ -39,8 +47,8 @@ app.use('/api/instructor', quizRoutes)
 app.use('/api/quizzes', quizRoutes)
 app.use('/api/earnings', EarningsRoutes)
 app.use('/api/user', progressRoutes)
-
 app.use('/api', certificateRoutes)
+app.use('/api/contact', contactRoutes)
 
 app.get('/', (req, res) => {
   res.send('API is running...! Hello vai')

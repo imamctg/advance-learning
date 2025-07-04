@@ -35,10 +35,13 @@ export default function Homepage() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/courses')
-      .then((res) => setCourses(res.data.data))
+      .get('http://localhost:5000/api/courses?status=published')
+      .then((res) => {
+        setCourses(res.data.data)
+      })
       .catch((err) => console.error(err))
   }, [])
+  // console.log(courses[0]?.instructor)
   return (
     // <ClientLayout>
     <main
@@ -105,7 +108,16 @@ export default function Homepage() {
               />
               <div className='p-4'>
                 <h3 className='text-xl font-bold'>{course.title}</h3>
-                <p className='text-gray-600 mb-2'>{course.instructor}</p>
+                {/* <p className='text-gray-600 mb-2'>
+                  {typeof course.instructor === 'object' &&
+                  'name' in course.instructor
+                    ? course.instructor.name
+                    : 'Unknown Instructor'}
+                </p> */}
+                <p className='text-gray-600 mb-2'>
+                  {course.instructor?.name || 'Unknown Instructor'}
+                </p>
+
                 <p className='text-indigo-700 font-semibold'>${course.price}</p>
               </div>
             </div>

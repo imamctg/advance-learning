@@ -211,7 +211,12 @@ const InstructorCourses = () => {
                         ✏️ Edit
                       </button>
                     </Link>
-
+                    {/* 👀 Preview button */}
+                    <Link href={`/learn/${course._id}`} target='_blank'>
+                      <button className='bg-gray-500 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-600 transition'>
+                        👀 Preview
+                      </button>
+                    </Link>
                     {course.status === 'draft' && (
                       <button
                         onClick={() => handleSubmitForReview(course._id)}

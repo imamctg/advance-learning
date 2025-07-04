@@ -19,7 +19,6 @@ import { getCloudinaryVideoDuration } from '../../utils/getCloudinaryVideoDurati
 import User, { IUser } from '../user/user.model'
 import UserProgressModel from './UserProgress.model'
 import { StatusCodes } from 'http-status-codes'
-// import { IUser } from '../user/user.model'
 
 // ✅ Create Course
 export const createCourse = async (req: Request, res: Response) => {
@@ -64,7 +63,9 @@ export const getAllCourses = async (req: Request, res: Response) => {
       filter.status = status
     }
     console.log(filter, 'filter')
-    const courses = await Course.find(filter) // ফিল্টার ব্যবহার করে কোর্স খোঁজা
+    const courses = await Course.find(filter)
+      .populate('instructor', 'name') // ✅ শুধু নাম আনো
+      .sort({ createdAt: -1 })
     res.status(200).json({ success: true, data: courses })
   } catch (error) {
     res

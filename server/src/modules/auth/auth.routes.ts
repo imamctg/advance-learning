@@ -11,8 +11,8 @@ const router = express.Router()
 
 router.post(
   '/register',
-  validateRequest(registerValidation),
   upload.single('nidFile'),
+  validateRequest(registerValidation),
   register
 )
 

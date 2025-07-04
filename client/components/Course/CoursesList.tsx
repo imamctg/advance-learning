@@ -42,7 +42,11 @@ const CoursesList = () => {
               {course.description}
             </p>
             <p className='text-sm text-gray-600 mb-2'>
-              Instructor : {course.instructor || 'Unknown Instructor'}
+              {typeof course.instructor === 'object' &&
+              course.instructor !== null &&
+              course.instructor.name
+                ? course.instructor.name
+                : 'Unknown Instructor'}
             </p>
             <div className='flex justify-between items-center'>
               <span className='text-blue-600 font-bold text-lg'>

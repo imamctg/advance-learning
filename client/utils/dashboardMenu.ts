@@ -13,6 +13,7 @@ import {
   FaTags,
   FaStar,
   FaFolderOpen,
+  FaEnvelopeOpenText,
 } from 'react-icons/fa'
 import { IconType } from 'react-icons'
 
@@ -101,6 +102,11 @@ export const menuByRole: Record<
       name: 'Messages',
       href: '/dashboard/admin/messages',
       icon: FaEnvelope,
+    },
+    {
+      name: 'Contact Messages',
+      href: '/dashboard/admin/contact-messages',
+      icon: FaEnvelopeOpenText,
     },
   ],
   student: [

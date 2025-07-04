@@ -121,6 +121,7 @@ import { Request, Response } from 'express'
 import { handleLogin, handleRegister, handleGetProfile } from './auth.service'
 
 export const register = async (req: Request, res: Response): Promise<void> => {
+  console.log(req.body, req.file, 'auth.controller')
   await handleRegister(req, res)
 }
 
