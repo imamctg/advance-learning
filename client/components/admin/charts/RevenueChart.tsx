@@ -1,63 +1,37 @@
 'use client'
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
   Tooltip,
-  Legend,
-} from 'chart.js'
-import { Line } from 'react-chartjs-2'
+  ResponsiveContainer,
+} from 'recharts'
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-)
+export default function RevenueChart({ chartData }: { chartData?: any[] }) {
+  const fallbackData = [
+    { month: 'Jan', revenue: 5000 },
+    { month: 'Feb', revenue: 8000 },
+    { month: 'Mar', revenue: 12000 },
+    { month: 'Apr', revenue: 9000 },
+    { month: 'May', revenue: 15000 },
+    { month: 'Jun', revenue: 18000 },
+  ]
 
-const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']
-
-export const data = {
-  labels,
-  datasets: [
-    {
-      label: 'Revenue',
-      data: [1200, 2100, 1800, 2500, 2200, 3000, 2800],
-      borderColor: '#4F46E5',
-      backgroundColor: 'rgba(79, 70, 229, 0.2)',
-      tension: 0.4,
-      fill: true,
-    },
-  ],
-}
-
-const options = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-    },
-    title: {
-      display: true,
-      text: 'Monthly Revenue (in USD)',
-    },
-  },
-}
-
-export default function RevenueChart() {
   return (
     <div className='bg-white p-6 rounded-lg shadow mt-10'>
       <h3 className='text-lg font-semibold mb-4 text-gray-800'>
-        📈 Revenue Overview
+        📊 Revenue Overview
       </h3>
-      <Line options={options} data={data} />
+      <ResponsiveContainer width='100%' height={300}>
+        <BarChart data={chartData || fallbackData}>
+          <XAxis dataKey='month' />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey='revenue' fill='#6366f1' radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   )
 }

@@ -22,6 +22,25 @@ export const updateUserRoleService = async (id: string, role: string) => {
   return user
 }
 
+export const updateInstructorStatusService = async (
+  userId: string,
+  status: 'pending' | 'approved' | 'rejected'
+) => {
+  if (!['pending', 'approved', 'rejected'].includes(status)) {
+    throw new Error('Invalid status value')
+  }
+
+  const user = await User.findById(userId)
+  if (!user || user.role !== 'instructor') {
+    throw new Error('Instructor not found')
+  }
+
+  user.status = status
+  await user.save()
+
+  return user
+}
+
 // ইউজার ইনফো আপডেট করা
 export const updateUserInfoService = async (
   id: string,

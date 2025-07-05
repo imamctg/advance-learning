@@ -7,6 +7,7 @@ import {
   updateUserInfo,
   addCourseToUser,
   getUserCourses,
+  updateInstructorStatus,
 } from './user.controller'
 import authMiddleware from '../../middlewares/authMiddleware'
 import { requireRole } from '../../middlewares/roleMiddleware'
@@ -23,6 +24,14 @@ router.patch(
   authMiddleware,
   requireRole(['admin']),
   updateUserRole
+)
+
+// Admin update instructor status
+router.put(
+  '/admin/instructor/:userId/status',
+  authMiddleware,
+  requireRole(['admin']),
+  updateInstructorStatus
 )
 
 router.put(

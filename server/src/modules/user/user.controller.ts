@@ -6,8 +6,9 @@ import {
   deleteUserService,
   addCourseToUserService,
   getUserCoursesService,
+  updateInstructorStatusService,
 } from './user.service'
-import { USER_ROLES, UserRole } from './user.model'
+import User, { USER_ROLES, UserRole } from './user.model'
 
 // সব ইউজার ফেরত দাও
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -50,6 +51,34 @@ export const updateUserRole = async (
   } catch (error) {
     console.error('Error updating user role:', error)
     res.status(500).json({ message: 'Server error' })
+  }
+}
+
+export const updateInstructorStatus = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { userId } = req.params
+  const { status } = req.body
+
+  try {
+    const updatedUser = await updateInstructorStatusService(userId, status)
+
+    return res.status(200).json({
+      success: true,
+      message: `Instructor status updated to ${status}`,
+      user: updatedUser,
+    })
+  } catch (error: any) {
+    if (error.message === 'Invalid status value') {
+      return res.status(400).json({ message: error.message })
+    } else if (error.message === 'Instructor not found') {
+      return res.status(404).json({ message: error.message })
+    } else {
+      return res
+        .status(500)
+        .json({ message: 'Server error', error: error.message })
+    }
   }
 }
 
