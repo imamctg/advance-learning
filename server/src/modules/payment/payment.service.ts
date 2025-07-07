@@ -61,8 +61,7 @@ export const initiateSSLCommerzPayment = async (payload: PaymentPayload) => {
   }
 
   const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
-  console.log(sslcz, 'sslcz service response')
   const response = await sslcz.init(data)
-  console.log(response, 'response ddddd')
+
   return response
 }

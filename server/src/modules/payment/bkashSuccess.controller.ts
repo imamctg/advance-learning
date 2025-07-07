@@ -1,34 +1,35 @@
-// paymentSuccess.controller.ts
-import { Order } from '../order/order.model'
-import Course from '../course/course.model'
-import User from '../user/user.model'
+// src/modules/payment/bkashSuccess.controller.ts
+
 import { Request, Response } from 'express'
 import { OrderService } from '../order/order.service'
+import Course from '../course/course.model'
+import User from '../user/user.model'
 import { Types } from 'mongoose'
 
-export const paymentSuccess = async (
+export const bkashSuccess = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
     const { tran_id, userId, courseId, orderId } = req.query
-    console.log('paymentSuccess:', { tran_id, userId, courseId, orderId })
 
-    if (!tran_id || !userId || !courseId) {
+    console.log('📦 bKash success:', { tran_id, userId, courseId, orderId })
+
+    if (!tran_id || !userId || !courseId || !orderId) {
       return res.status(400).json({ message: 'Missing parameters' })
     }
 
-    // 1. Update order status and create earnings record
+    // Step 1: Order Update & Receipt Save
     const updatedOrder = await OrderService.handleSuccessfulPayment(
       new Types.ObjectId(orderId as string),
-      `https://example.com/receipts/${tran_id}` // You should get actual receipt URL
+      `https://example.com/receipts/${tran_id}` // বিকাশ রশিদ ইউআরএল পরে ইন্টিগ্রেট করা যাবে
     )
 
     if (!updatedOrder) {
       return res.status(404).json({ message: 'Order not found' })
     }
 
-    // 2. Add student to course
+    // Step 2: Add student to course
     await Course.findByIdAndUpdate(
       courseId,
       {
@@ -38,19 +39,21 @@ export const paymentSuccess = async (
       { new: true }
     )
 
-    // 3. Add course to user's purchasedCourses
+    // Step 3: Add course to user
     await User.findByIdAndUpdate(
       userId,
-      { $addToSet: { purchasedCourses: courseId } },
+      {
+        $addToSet: { purchasedCourses: courseId },
+      },
       { new: true }
     )
 
-    // 4. Redirect client
+    // Step 4: Redirect to success page
     res.redirect(
       `http://localhost:3000/payment/success?tran_id=${tran_id}&userId=${userId}&courseId=${courseId}`
     )
-  } catch (err) {
-    console.error('Payment success error:', err)
+  } catch (error) {
+    console.error('bKash success error:', error)
     res.status(500).json({ message: 'Internal server error' })
   }
 }

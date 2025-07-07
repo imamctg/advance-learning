@@ -167,7 +167,7 @@ export default function SuccessPage() {
         setMessage('✅ Payment confirmed and course added! Redirecting...')
 
         setTimeout(() => {
-          router.push('/dashboard/user/my-courses')
+          router.push('/dashboard/student/my-courses')
         }, 3000)
       } catch (error: any) {
         console.error('❌ Error:', error.message)
