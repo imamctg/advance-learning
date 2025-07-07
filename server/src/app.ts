@@ -11,6 +11,7 @@ import certificateRoutes from './modules/certificate/certificate.route'
 import quizRoutes from './modules/quiz/quiz.routes'
 import progressRoutes from './modules/progress/progress.routes'
 import contactRoutes from './modules/contact/contact.routes'
+import reviewRoutes from './modules/review/reviews.routes'
 
 import dotenv from 'dotenv'
 import e from 'express'
@@ -33,6 +34,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/courses', courseRoutes)
 app.use('/api/lectures', courseRoutes)
 app.use('/api', userRoutes)
+app.use('/api', reviewRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/users', userRoutes)
 

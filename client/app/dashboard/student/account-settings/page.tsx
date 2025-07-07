@@ -109,7 +109,6 @@ export default function AccountSettingsPage() {
 
   return (
     <div className='max-w-2xl mx-auto p-6 mt-12 bg-white rounded-2xl shadow-md'>
-      <Toaster position='top-right' reverseOrder={false} />
       <h1 className='text-3xl font-semibold mb-6 text-center text-blue-600'>
         ⚙️ Account Settings
       </h1>

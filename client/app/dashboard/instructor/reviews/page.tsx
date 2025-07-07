@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { FaStar } from 'react-icons/fa'
 import { toast } from 'react-hot-toast'
 import axios from 'axios'
+import { useSelector } from 'react-redux'
+import { RootState } from 'features/redux/store'
 
 interface Review {
   _id: string
@@ -15,13 +17,19 @@ interface Review {
 }
 
 export default function InstructorReviewsPage() {
+  const token = useSelector((state: RootState) => state.auth.token)
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await axios.get('/api/instructor/reviews')
+        const res = await axios.get(
+          'http://localhost:5000/api/instructor/reviews',
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
         setReviews(res.data)
       } catch (error) {
         console.error(error)

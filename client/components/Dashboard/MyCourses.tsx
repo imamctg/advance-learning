@@ -5,12 +5,18 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import Link from 'next/link'
 import { RootState } from 'features/redux/store'
+import ReviewModal from 'components/common/ReviewModal'
 
 interface CourseWithProgress {
   _id: string
   title: string
   thumbnail: string
-  instructor: string
+  instructor:
+    | {
+        _id: string
+        name: string
+      }
+    | string
   progress: number
   totalLectures: number
   completedLectures: number
@@ -20,12 +26,13 @@ const MyCourses = () => {
   const [courses, setCourses] = useState<CourseWithProgress[]>([])
   const user = useSelector((state: RootState) => state.auth.user)
   const token = useSelector((state: RootState) => state.auth.token)
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [selectedCourse, setSelectedCourse] =
+    useState<CourseWithProgress | null>(null)
 
   useEffect(() => {
     const fetchCourses = async () => {
-      console.log(user, 'user')
       const userId = user?._id || user?.id
-      console.log(userId, 'userId')
       if (!userId || !token) return
 
       try {
@@ -40,7 +47,7 @@ const MyCourses = () => {
         setCourses(response.data.courses)
       } catch (error) {
         console.error('❌ Error fetching user courses with progress:', error)
-        // Fallback to previous endpoint if new one fails
+        // fallback
         try {
           const baseUrl =
             process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
@@ -76,8 +83,11 @@ const MyCourses = () => {
       {courses.length > 0 ? (
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
           {courses.map((course) => (
-            <Link href={`/learn/${course._id}`} key={course._id}>
-              <div className='bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer'>
+            <div
+              key={course._id}
+              className='bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition'
+            >
+              <Link href={`/learn/${course._id}`} className='block'>
                 <div className='h-40 bg-gray-200'>
                   <img
                     src={course.thumbnail || '/default-thumbnail.jpg'}
@@ -89,12 +99,15 @@ const MyCourses = () => {
                 <div className='p-4'>
                   <h3 className='text-lg font-semibold mb-1'>{course.title}</h3>
                   <p className='text-sm text-gray-600 mb-2'>
-                    By {course.instructor || 'Unknown Instructor'}
+                    By{' '}
+                    {typeof course.instructor === 'object'
+                      ? course.instructor.name
+                      : course.instructor}
                   </p>
 
                   {/* Progress */}
                   <div className='mb-2'>
-                    <div className='w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-300'>
+                    <div className='w-full bg-gray-200 rounded-full h-2.5'>
                       <div
                         className='bg-green-500 h-2.5 rounded-full'
                         style={{ width: `${course.progress || 0}%` }}
@@ -113,13 +126,35 @@ const MyCourses = () => {
                       : '▶️ Continue Course'}
                   </p>
                 </div>
-              </div>
-            </Link>
+              </Link>
+
+              {/* ⭐ Review Button */}
+              {course.progress === 100 && (
+                <div className='p-4 pt-0'>
+                  <button
+                    onClick={() => {
+                      setSelectedCourse(course)
+                      setShowReviewModal(true)
+                    }}
+                    className='mt-2 text-sm text-yellow-600 hover:underline'
+                  >
+                    ⭐ Review This Course
+                  </button>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       ) : (
         <p>আপনি এখনো কোনো কোর্স এনরোল করেননি।</p>
       )}
+
+      {/* ⭐ Review Modal */}
+      <ReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        courseId={selectedCourse?._id || ''}
+      />
     </div>
   )
 }

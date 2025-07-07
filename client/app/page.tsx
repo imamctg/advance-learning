@@ -31,6 +31,7 @@ const testimonials = [
 
 export default function Homepage() {
   const [courses, setCourses] = useState([])
+  const [testimonials, setTestimonials] = useState([])
   // const router = useRouter()
 
   useEffect(() => {
@@ -41,7 +42,13 @@ export default function Homepage() {
       })
       .catch((err) => console.error(err))
   }, [])
-  // console.log(courses[0]?.instructor)
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:5000/api/homepage-reviews')
+      .then((res) => setTestimonials(res.data))
+      .catch((err) => console.error('Failed to fetch testimonials:', err))
+  }, [])
   return (
     // <ClientLayout>
     <main
@@ -163,8 +170,8 @@ export default function Homepage() {
               data-aos-delay={i * 100}
             >
               <img
-                src={t.image}
-                alt={t.name}
+                src={t.profileImage || '/users/default.jpg'}
+                alt={t.studentName}
                 className='w-16 h-16 rounded-full object-cover border-2 border-indigo-500'
               />
               <div>
@@ -174,7 +181,7 @@ export default function Homepage() {
                     <Star key={i} size={16} fill='currentColor' />
                   ))}
                 </div>
-                <p className='text-sm text-gray-500 mt-1'>— {t.name}</p>
+                <p className='text-sm text-gray-500 mt-1'>— {t.studentName}</p>
               </div>
             </div>
           ))}

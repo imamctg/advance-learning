@@ -1,69 +1,98 @@
-import Course, { ICourse, ISection, ILecture } from '../course/course.model'
+import Course from '../course/course.model'
 import UserProgress from '../course/UserProgress.model'
 import { Types } from 'mongoose'
 
+// ✅ Course Progress Return Type
 interface CourseProgress {
   _id: Types.ObjectId
   title: string
   thumbnail: string
-  instructor: string | Types.ObjectId
+  instructor: {
+    name: string
+    _id: string
+  }
   progress: number
   totalLectures: number
   completedLectures: number
 }
 
+// ✅ Custom Lean Course Type
+interface EnrolledCourseLean {
+  _id: Types.ObjectId
+  title: string
+  thumbnail: string
+  instructor: {
+    _id: Types.ObjectId
+    name: string
+  }
+  sections: {
+    lectures: {
+      _id: Types.ObjectId
+    }[]
+  }[]
+}
+
 export const getCourseProgressService = async (
   userId: string
 ): Promise<CourseProgress[]> => {
-  // Get all courses the user is enrolled in with proper typing
+  // ✅ 1. Get enrolled courses with instructor populated
   const enrolledCourses = await Course.find(
     { students: userId },
     '_id title thumbnail instructor sections'
-  ).lean<
-    Pick<ICourse, '_id' | 'title' | 'thumbnail' | 'instructor' | 'sections'>[]
-  >()
+  )
+    .populate<{ instructor: { _id: Types.ObjectId; name: string } }>(
+      'instructor',
+      'name'
+    )
+    .lean<EnrolledCourseLean[]>()
 
-  // Get all completed lectures for this user
+  // ✅ 2. Get completed lecture IDs for the user
   const completedLectures = await UserProgress.find(
     { user: userId, completed: true },
     'lecture'
-  ).lean<{ lecture: Types.ObjectId }[]>()
+  ).lean()
 
   const completedLectureIds = completedLectures.map((cl) =>
     cl.lecture.toString()
   )
 
-  // Calculate progress for each course with proper typing
-  const coursesWithProgress = enrolledCourses.map((course) => {
-    // Count total lectures in course
-    let totalLectures = 0
-    let completedLecturesCount = 0
+  // ✅ 3. Calculate progress for each course
+  const coursesWithProgress: CourseProgress[] = enrolledCourses.map(
+    (course) => {
+      let totalLectures = 0
+      let completedLecturesCount = 0
 
-    // Add type annotations for section and lecture
-    course.sections.forEach((section: ISection) => {
-      section.lectures.forEach((lecture: ILecture) => {
-        totalLectures++
-        if (completedLectureIds.includes(lecture._id.toString())) {
-          completedLecturesCount++
-        }
+      const sections = course.sections || []
+
+      sections.forEach((section) => {
+        const lectures = section.lectures || []
+        lectures.forEach((lecture) => {
+          totalLectures++
+          if (completedLectureIds.includes(lecture._id.toString())) {
+            completedLecturesCount++
+          }
+        })
       })
-    })
 
-    const progress =
-      totalLectures > 0
-        ? Math.round((completedLecturesCount / totalLectures) * 100)
-        : 0
+      const progress =
+        totalLectures > 0
+          ? Math.round((completedLecturesCount / totalLectures) * 100)
+          : 0
 
-    return {
-      _id: course._id,
-      title: course.title,
-      thumbnail: course.thumbnail,
-      instructor: course.instructor,
-      progress,
-      totalLectures,
-      completedLectures: completedLecturesCount,
-    } as CourseProgress // Type assertion here
-  })
+      return {
+        _id: course._id,
+        title: course.title,
+        thumbnail: course.thumbnail,
+        instructor: {
+          _id: course.instructor._id.toString(),
+          name: course.instructor.name,
+        },
+        progress,
+        totalLectures,
+        completedLectures: completedLecturesCount,
+      }
+    }
+  )
 
   return coursesWithProgress
 }
