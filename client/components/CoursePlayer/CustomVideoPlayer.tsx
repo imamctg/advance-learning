@@ -39,8 +39,11 @@ const CustomVideoPlayer: React.FC<Props> = ({ src, onComplete }) => {
         ref={videoRef}
         src={src}
         controls
+        controlsList='nodownload'
+        disablePictureInPicture
         className='w-full aspect-video'
       />
+
       <div className='h-1 bg-gray-200'>
         <div className='h-full bg-blue-600' style={{ width: `${progress}%` }} />
       </div>

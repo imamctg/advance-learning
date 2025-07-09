@@ -2,7 +2,6 @@ import { Types } from 'mongoose'
 import { Order } from '../order/order.model'
 import { Earnings } from './earnings.model'
 import User from '../user/user.model'
-// import { User } from '../user/user.model';
 
 const PAYMENT_GATEWAY_FEE_PERCENT = 3 // 3% Stripe/SSLCommerz fee
 
@@ -28,19 +27,26 @@ export class EarningsService {
       : 'platform' // Add your actual logic here
 
     // Calculate earnings based on your revenue model
+    // const { grossAmount, platformFee, instructorEarnings, affiliateFee } =
+    //   this.calculateEarnings(order.amount, studentSource)
+
+    const paymentGatewayFee = (order.amount * PAYMENT_GATEWAY_FEE_PERCENT) / 100
+    const netAmount = order.amount - paymentGatewayFee // ফি বাদ后的 নিট Amount
+
     const { grossAmount, platformFee, instructorEarnings, affiliateFee } =
-      this.calculateEarnings(order.amount, studentSource)
+      this.calculateEarnings(netAmount, studentSource) // netAmount ব্যবহার করুন
 
     const earning = new Earnings({
+      grossAmount: order.amount, // অরিজিনাল Amount রাখুন
+      paymentGatewayFee,
+      platformFee,
+      instructorEarnings,
+      affiliateFee,
       instructorId: course.instructor,
       orderId: order._id,
       courseId: course._id,
       studentSource,
-      grossAmount,
-      platformFee,
-      affiliateFee,
-      instructorEarnings,
-      paymentGatewayFee: (order.amount * PAYMENT_GATEWAY_FEE_PERCENT) / 100,
+
       status: 'pending',
     })
 
