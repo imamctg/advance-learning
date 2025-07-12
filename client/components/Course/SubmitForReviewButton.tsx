@@ -1,6 +1,6 @@
 // src/components/course/SubmitForReviewButton.tsx
 // import { submitForReview } from '@/services/courseService';
-import { submitForReview } from 'app/services/courseService'
+import { submitForReview } from 'app/[locale]/services/courseService'
 import { useRouter } from 'next/router'
 
 const SubmitForReviewButton = ({ courseId }: { courseId: string }) => {

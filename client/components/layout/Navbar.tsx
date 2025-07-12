@@ -6,36 +6,21 @@ import { FaBars, FaThLarge, FaTimes } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from 'features/redux/store'
 import { loginSuccess, logout } from 'features/auth/redux/authSlice'
-import { usePathname, useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { getProfileMenuByRole } from 'utils/profileMenu'
 import { getRoleBadgeColor, getRoleDisplayName } from 'utils/roleUtils'
-import { BookOpenIcon } from 'lucide-react'
-
-const menuItems = [
-  { name: 'Home', href: '/' },
-  { name: 'Courses', href: '/courses' },
-  { name: 'About', href: '/about' },
-  { name: 'Contact', href: '/contact' },
-]
+import { usePathname, useRouter } from 'next/navigation'
+import LanguageSwitcher from 'components/common/LanguageSwitcher'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const dispatch = useDispatch<AppDispatch>()
-  const router = useRouter()
   const user = useSelector((state: RootState) => state.auth.user)
   const pathname = usePathname()
+  const router = useRouter()
+  const locale = useLocale()
+  const t = useTranslations('navbar')
   const isDashboardPage = pathname.startsWith('/dashboard')
-
-  // Restore user from localStorage
-  // useEffect(() => {
-  //   const stored = localStorage.getItem('user')
-  //   if (stored) {
-  //     const parsed = JSON.parse(stored)
-  //     if (parsed.user && parsed.token) {
-  //       dispatch(loginSuccess(parsed))
-  //     }
-  //   }
-  // }, [dispatch])
 
   useEffect(() => {
     try {
@@ -48,7 +33,7 @@ export default function Navbar() {
       }
     } catch (err) {
       console.error('Failed to parse user from localStorage', err)
-      localStorage.removeItem('user') // corrupted data থাকলে মুছে ফেলুন
+      localStorage.removeItem('user')
     }
   }, [dispatch])
 
@@ -57,15 +42,26 @@ export default function Navbar() {
     router.push('/auth/login')
   }
 
-  // Sidebar toggle (for dashboard)
   const handleSidebarToggle = () => {
     const event = new CustomEvent('toggleDashboardSidebar')
     window.dispatchEvent(event)
   }
 
+  const handleChangeLocale = (newLocale: string) => {
+    const segments = pathname.split('/')
+    segments[1] = newLocale // দ্বিতীয় segment হলো current locale
+    const newPath = segments.join('/')
+    router.push(newPath)
+  }
+
   const profileMenuItems = user ? getProfileMenuByRole(user.role) : []
 
-  console.log(user, 'user info')
+  const menuItems = [
+    { name: t('home'), href: '/' },
+    { name: t('courses'), href: '/courses' },
+    { name: t('about'), href: '/about' },
+    { name: t('contact'), href: '/contact' },
+  ]
 
   return (
     <header className='bg-white shadow sticky top-0 z-50'>
@@ -81,7 +77,6 @@ export default function Navbar() {
           </button>
         )}
 
-        {/* Center: Logo */}
         <Link
           href='/'
           className='absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold text-indigo-600 md:static md:translate-x-0 md:left-auto'
@@ -89,7 +84,6 @@ export default function Navbar() {
           Course<span className='text-purple-600'>App</span>
         </Link>
 
-        {/* Right: Navbar Menu Toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className='md:hidden text-xl text-indigo-600'
@@ -97,57 +91,36 @@ export default function Navbar() {
           {menuOpen ? <FaTimes /> : <FaBars />}
         </button>
 
-        {/* Desktop Menu */}
         <nav className='hidden md:flex space-x-6 font-medium'>
-          <Link href='/' className='hover:text-indigo-600'>
-            Home
-          </Link>
-          <Link href='/courses' className='hover:text-indigo-600'>
-            Courses
-          </Link>
-          <Link href='/about' className='hover:text-indigo-600'>
-            About
-          </Link>
-          <Link href='/contact' className='hover:text-indigo-600'>
-            Contact
-          </Link>
+          {menuItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className='hover:text-indigo-600'
+            >
+              {item.name}
+            </Link>
+          ))}
 
           {!user && (
             <Link
               href='/auth/register?role=instructor'
               className='hover:text-indigo-600'
             >
-              Become Instructor
+              {t('becomeInstructor')}
             </Link>
           )}
 
-          {user?.role === 'instructor' && (
+          {user && (
             <Link
-              href='/dashboard/instructor'
+              href={`/dashboard/${user.role}`}
               className='text-indigo-600 hover:underline font-semibold'
             >
-              Dashboard
-            </Link>
-          )}
-          {user?.role === 'admin' && (
-            <Link
-              href='/dashboard/admin'
-              className='text-indigo-600 hover:underline font-semibold'
-            >
-              Dashboard
-            </Link>
-          )}
-          {user?.role === 'student' && (
-            <Link
-              href='/dashboard/student'
-              className='text-indigo-600 hover:underline font-semibold'
-            >
-              Dashboard
+              {t('dashboard')}
             </Link>
           )}
         </nav>
 
-        {/* Desktop Right Side Buttons */}
         <div className='hidden md:flex items-center gap-4'>
           {!user ? (
             <>
@@ -155,13 +128,13 @@ export default function Navbar() {
                 href='/auth/login'
                 className='text-indigo-600 hover:underline'
               >
-                Login
+                {t('login')}
               </Link>
               <Link
                 href='/auth/register?role=student'
                 className='bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition'
               >
-                Sign Up
+                {t('signup')}
               </Link>
             </>
           ) : (
@@ -173,7 +146,6 @@ export default function Navbar() {
                   className='w-10 h-10 rounded-full border cursor-pointer'
                 />
               </div>
-
               <div className='absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg text-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50'>
                 <div className='px-4 py-2 border-b'>
                   <div className='font-bold text-indigo-700'>{user.name}</div>
@@ -205,7 +177,7 @@ export default function Navbar() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className=' px-4 py-2 hover:bg-gray-100 flex items-center gap-2'
+                      className='px-4 py-2 hover:bg-gray-100 flex items-center gap-2'
                     >
                       <item.icon className='w-4 h-4' />
                       {item.name}
@@ -215,13 +187,35 @@ export default function Navbar() {
               </div>
             </div>
           )}
+
+          {/* 🌐 Language Switcher - Desktop */}
+          {/* <div className='relative group'>
+            <button className='text-sm font-medium text-gray-600 hover:text-indigo-600'>
+              🌐 {locale.toUpperCase()}
+            </button>
+            <div className='absolute mt-2 w-24 bg-white rounded shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-40'>
+              {['en', 'bn'].map((lng) => (
+                <button
+                  key={lng}
+                  onClick={() => handleChangeLocale(lng)}
+                  className={`block w-full px-4 py-2 text-left hover:bg-gray-100 ${
+                    locale === lng ? 'font-bold text-indigo-600' : ''
+                  }`}
+                >
+                  {lng === 'en' ? 'English' : 'বাংলা'}
+                </button>
+              ))}
+            </div>
+          </div> */}
+          <div className='hidden md:flex items-center gap-4'>
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* 📱 Mobile Menu */}
       {menuOpen && (
         <div className='md:hidden px-4 pb-4 space-y-2 text-center bg-white shadow'>
-          {/* User Info Section */}
           {user && (
             <div className='px-4 py-2 border-b border-gray-200'>
               <div className='font-semibold'>{user.name}</div>
@@ -235,7 +229,6 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Common Links */}
           {menuItems.map((item) => (
             <Link
               key={item.name}
@@ -247,18 +240,16 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Conditional Links */}
           {!user && (
             <Link
               href='/auth/register?role=instructor'
               className='block px-4 py-2 text-green-700 font-semibold hover:bg-gray-50'
               onClick={() => setMenuOpen(false)}
             >
-              Become Instructor
+              {t('becomeInstructor')}
             </Link>
           )}
 
-          {/* Auth Links */}
           {!user ? (
             <>
               <Link
@@ -266,14 +257,14 @@ export default function Navbar() {
                 className='block px-4 py-2 text-indigo-600 hover:bg-gray-50'
                 onClick={() => setMenuOpen(false)}
               >
-                Login
+                {t('login')}
               </Link>
               <Link
                 href='/auth/register'
                 className='block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700'
                 onClick={() => setMenuOpen(false)}
               >
-                Sign Up
+                {t('signup')}
               </Link>
             </>
           ) : (
@@ -283,7 +274,7 @@ export default function Navbar() {
                 className='block px-4 py-2 text-indigo-600 font-semibold hover:bg-gray-50'
                 onClick={() => setMenuOpen(false)}
               >
-                Dashboard
+                {t('dashboard')}
               </Link>
 
               {profileMenuItems.map((item) =>
@@ -313,6 +304,32 @@ export default function Navbar() {
               )}
             </>
           )}
+
+          {/* 🌐 Language Switcher - Mobile */}
+          {/* <div className='border-t border-gray-200 mt-2 pt-2'>
+            <p className='text-sm text-gray-500 mb-1'>🌐 Language</p>
+            <div className='flex justify-center gap-4'>
+              {['en', 'bn'].map((lng) => (
+                <button
+                  key={lng}
+                  onClick={() => {
+                    handleChangeLocale(lng)
+                    setMenuOpen(false)
+                  }}
+                  className={`px-3 py-1 rounded text-sm border ${
+                    locale === lng
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-gray-700'
+                  }`}
+                >
+                  {lng === 'en' ? 'EN' : 'বাংলা'}
+                </button>
+              ))}
+            </div>
+          </div> */}
+          <div className='border-t border-gray-200 mt-2 pt-2'>
+            <LanguageSwitcher />
+          </div>
         </div>
       )}
     </header>

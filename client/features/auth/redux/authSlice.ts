@@ -38,8 +38,10 @@ const userSlice = createSlice({
 
     logout: (state) => {
       state.user = null
+      state.token = null
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('user') // এই লাইন যোগ করো
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
       }
     },
   },

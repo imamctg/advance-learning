@@ -2,16 +2,18 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 const CoursesList = () => {
   const [courses, setCourses] = useState([])
   const router = useRouter()
+  const t = useTranslations('courses')
 
   useEffect(() => {
     axios
       .get('http://localhost:5000/api/courses', {
         params: {
-          status: 'published', // ফিল্টার প্যারামিটার যোগ করুন
+          status: 'published',
         },
       })
       .then((res) => setCourses(res.data.data))
@@ -21,7 +23,7 @@ const CoursesList = () => {
   const handleEnroll = (courseId: string) => {
     router.push(`/courses/${courseId}`)
   }
-  console.log(courses, 'courses')
+
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 py-8'>
       {courses.map((course: any) => (
@@ -30,7 +32,7 @@ const CoursesList = () => {
           className='bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transition duration-300'
         >
           <img
-            src={course.thumbnail || 'https://via.placeholder.com/400x250'} // fallback image
+            src={course.thumbnail || 'https://via.placeholder.com/400x250'}
             alt={course.title}
             className='w-full h-48 object-cover'
           />
@@ -42,11 +44,7 @@ const CoursesList = () => {
               {course.description}
             </p>
             <p className='text-sm text-gray-600 mb-2'>
-              {typeof course.instructor === 'object' &&
-              course.instructor !== null &&
-              course.instructor.name
-                ? course.instructor.name
-                : 'Unknown Instructor'}
+              {course.instructor?.name || t('unknownInstructor')}
             </p>
             <div className='flex justify-between items-center'>
               <span className='text-blue-600 font-bold text-lg'>
@@ -56,7 +54,7 @@ const CoursesList = () => {
                 onClick={() => handleEnroll(course._id)}
                 className='bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition'
               >
-                Enroll
+                {t('enroll')}
               </button>
             </div>
           </div>

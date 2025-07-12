@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "types": ["node", "next", "next-intl"],
+
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
@@ -7,7 +9,7 @@
     },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "types": ["node"],
+
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -25,6 +27,12 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "next-intl.config.js"
+  ],
   "exclude": ["node_modules"]
 }

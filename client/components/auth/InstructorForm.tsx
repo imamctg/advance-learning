@@ -321,7 +321,7 @@
 // }
 
 'use client'
-
+import { useTranslations } from 'next-intl'
 import React, { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import axios from 'axios'
@@ -330,6 +330,7 @@ import PasswordHints from './PasswordHints'
 import ReCAPTCHA from 'react-google-recaptcha'
 
 export default function InstructorForm() {
+  const t = useTranslations('instructorForm')
   const router = useRouter()
   const searchParams = useSearchParams()
   const [agreePolicy, setAgreePolicy] = useState(false)
@@ -402,12 +403,8 @@ export default function InstructorForm() {
     <div className='min-h-screen flex items-center justify-center bg-gray-100 px-4 py-12'>
       <div className='max-w-xl w-full space-y-6 bg-white shadow-xl p-8 rounded-xl'>
         <div className='text-center'>
-          <h2 className='text-3xl font-bold text-blue-600'>
-            Become an Instructor
-          </h2>
-          <p className='text-gray-500 text-sm mt-1'>
-            Join and teach students worldwide.
-          </p>
+          <h2 className='text-3xl font-bold text-blue-600'>{t('title')}</h2>
+          <p className='text-gray-500 text-sm mt-1'>{t('subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
@@ -486,8 +483,8 @@ export default function InstructorForm() {
               className='mt-1'
             />
             <label htmlFor='agree' className='leading-5'>
-              I agree to the{' '}
-              <a
+              {t('terms')}{' '}
+              {/* <a
                 href='/terms-conditions?role=instructor'
                 target='_blank'
                 className='text-blue-600 hover:underline'
@@ -502,6 +499,22 @@ export default function InstructorForm() {
                 className='text-blue-600 hover:underline'
               >
                 Privacy Policy
+              </a> */}
+              <a
+                href='/terms-conditions?role=instructor'
+                target='_blank'
+                className='text-blue-600 hover:underline'
+              >
+                {t('termsLink')}
+              </a>{' '}
+              {t('and')}{' '}
+              <a
+                href='/privacy-policy'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-600 hover:underline'
+              >
+                {t('privacyLink')}
               </a>
               .
             </label>
@@ -512,7 +525,7 @@ export default function InstructorForm() {
             disabled={submitting || !recaptchaToken}
             className='w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50'
           >
-            {submitting ? 'Registering...' : 'Register'}
+            {submitting ? t('registering') : t('register')}
           </button>
         </form>
       </div>

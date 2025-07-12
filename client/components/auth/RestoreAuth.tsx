@@ -1,22 +1,28 @@
-// components/RestoreAuth.tsx
 'use client'
 
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { loginSuccess } from 'features/auth/redux/authSlice'
-// import { loginSuccess } from '/redux/userSlice'
 
 const RestoreAuth = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
     const userFromStorage = localStorage.getItem('user')
-    if (userFromStorage && userFromStorage !== 'undefined') {
+    const tokenFromStorage = localStorage.getItem('token')
+
+    if (
+      userFromStorage &&
+      tokenFromStorage &&
+      userFromStorage !== 'undefined' &&
+      tokenFromStorage !== 'undefined'
+    ) {
       try {
         const user = JSON.parse(userFromStorage)
-        dispatch(loginSuccess(user))
+        const token = JSON.parse(tokenFromStorage)
+        dispatch(loginSuccess({ user, token }))
       } catch (error) {
-        console.error('❌ Failed to parse user:', error)
+        console.error('❌ Failed to parse auth data:', error)
       }
     }
   }, [dispatch])

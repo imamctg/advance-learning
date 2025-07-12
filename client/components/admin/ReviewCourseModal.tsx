@@ -1,5 +1,5 @@
 // src/components/admin/ReviewCourseModal.tsx
-import { reviewCourse } from 'app/services/courseService'
+import { reviewCourse } from 'app/[locale]/services/courseService'
 import { RootState } from 'features/redux/store'
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'

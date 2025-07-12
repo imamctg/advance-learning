@@ -1,0 +1,38 @@
+{
+  "home": {
+    "hero": {
+      "title": "Learn From The Best Instructors",
+      "description": "Explore thousands of online courses and level up your skills.",
+      "browse": "Browse Courses"
+    },
+    "categories": {
+      "title": "Popular Categories",
+      "items": {
+        "web": "Web Development",
+        "design": "Design",
+        "marketing": "Marketing",
+        "data": "Data Science"
+      }
+    },
+    "courses": {
+      "title": "Featured Courses"
+    },
+    "why": {
+      "title": "Why Choose CourseApp?",
+      "expert": "Expert Instructors",
+      "flexible": "Flexible Learning",
+      "certified": "Certificates",
+      "expertDesc": "Learn from industry experts",
+      "flexibleDesc": "Study anytime, anywhere",
+      "certifiedDesc": "Get certified after completion"
+    },
+    "testimonials": {
+      "title": "What Our Students Say"
+    },
+    "cta": {
+      "title": "Ready to Start Learning?",
+      "description": "Join thousands of learners today!",
+      "button": "Get Started"
+    }
+  }
+}

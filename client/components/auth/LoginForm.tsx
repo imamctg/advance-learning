@@ -75,14 +75,16 @@
 
 'use client'
 
-import React, { useState } from 'react'
+import React, { use, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useDispatch } from 'react-redux'
 import { loginSuccess } from 'features/auth/redux/authSlice'
+import { useTranslations } from 'next-intl'
 
 const LoginForm = () => {
+  const t = useTranslations('login')
   const router = useRouter()
   const dispatch = useDispatch()
   const searchParams = useSearchParams()
@@ -108,13 +110,14 @@ const LoginForm = () => {
         const { token, ...user } = response.data.data
         localStorage.setItem('user', JSON.stringify({ user, token }))
         dispatch(loginSuccess({ user, token }))
-        toast.success('Login successful!')
+        toast.success(t('success'))
         setTimeout(() => {
           router.push(redirectPath)
         }, 1000)
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed!')
+      // toast.error(error.response?.data?.message || 'Login failed!')
+      toast.error(t('error'))
     }
   }
 
@@ -122,7 +125,7 @@ const LoginForm = () => {
     <form onSubmit={handleLogin} className='flex flex-col gap-4'>
       <input
         type='email'
-        placeholder='Email'
+        placeholder={t('emailPlaceholder')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         className='border p-2 rounded'
@@ -130,7 +133,7 @@ const LoginForm = () => {
       />
       <input
         type='password'
-        placeholder='Password'
+        placeholder={t('passwordPlaceholder')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className='border p-2 rounded'
@@ -140,7 +143,7 @@ const LoginForm = () => {
         type='submit'
         className='bg-blue-600 text-white py-2 rounded hover:bg-blue-700'
       >
-        Login
+        {t('login')}
       </button>
     </form>
   )

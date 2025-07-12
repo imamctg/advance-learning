@@ -1,31 +1,17 @@
-// client/middleware.ts
+import { NextRequest } from 'next/server'
+import createMiddleware from 'next-intl/middleware'
+import nextIntlConfig from './next-intl.config'
 
-import { NextRequest, NextResponse } from 'next/server'
+const intlMiddleware = createMiddleware({
+  locales: nextIntlConfig.locales,
+  defaultLocale: nextIntlConfig.defaultLocale,
+  localePrefix: 'always',
+})
 
-// protect এই রুটগুলো
-const adminRoutes = ['/admin', '/admin/dashboard', '/admin/users']
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // 1️⃣ Cookie থেকে token/role পড়া
-  const token = request.cookies.get('token')?.value
-  const role = request.cookies.get('role')?.value
-
-  // 2️⃣ যদি admin route হয়
-  // if (adminRoutes.some((route) => pathname.startsWith(route))) {
-  //   if (!token || role !== 'admin') {
-  //     // যদি না থাকে বা admin না হয়
-  //     const url = request.nextUrl.clone()
-  //     url.pathname = '/unauthorized' // বা '/login'
-  //     return NextResponse.redirect(url)
-  //   }
-  // }
-
-  return NextResponse.next()
+export default function middleware(request: NextRequest) {
+  return intlMiddleware(request)
 }
 
-// ✅ middleware config অংশ
-// export const config = {
-//   matcher: ['/admin/:path*'], // এই রুটগুলোতে middleware চালু হবে
-// }
+export const config = {
+  matcher: ['/', '/(en|bn)/:path*', '/((?!_next|_vercel|.*\\..*).*)'],
+}

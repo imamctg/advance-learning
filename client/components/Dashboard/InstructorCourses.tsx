@@ -12,7 +12,7 @@ import {
   getInstructorCourses,
   publishCourse,
   submitForReview,
-} from 'app/services/courseService'
+} from 'app/[locale]/services/courseService'
 import StatusBadge from 'components/Course/StatusBadge'
 import AdminNotes from 'components/Course/AdminNotes'
 
