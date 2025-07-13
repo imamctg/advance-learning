@@ -25,7 +25,7 @@ const EditSectionPage = () => {
       if (!token || !courseId || !sectionId) return
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/courses/${courseId}/sections`,
+          `http://localhost:5000/api/courses/${courseId}/sections`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

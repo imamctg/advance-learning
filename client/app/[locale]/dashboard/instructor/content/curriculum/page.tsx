@@ -21,7 +21,8 @@ const CurriculumCourseListPage = () => {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/${user.id}/courses`,
+          // `http://localhost:5000/api/instructor/${user.id}/courses`,
+          `http://localhost:5000/api/courses/${user.id}/courses`,
           { headers: { Authorization: `Bearer ${token}` } }
         )
         setCourses(res.data.courses || [])

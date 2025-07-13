@@ -121,12 +121,9 @@ const QuizzesPage = () => {
       setLoading(true)
       try {
         const [sectionsRes, quizzesRes] = await Promise.all([
-          axios.get(
-            `http://localhost:5000/api/instructor/courses/${courseId}/sections`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          ),
+          axios.get(`http://localhost:5000/api/courses/${courseId}/sections`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
           axios.get(`http://localhost:5000/api/quizzes/course/${courseId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),

@@ -29,7 +29,7 @@ export default function Homepage() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/homepage-reviews')
+      .get('http://localhost:5000/api/reviews/homepage-reviews')
       .then((res) => setTestimonials(res.data))
       .catch((err) => console.error('Failed to fetch testimonials:', err))
   }, [])

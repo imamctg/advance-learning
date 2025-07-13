@@ -66,7 +66,7 @@ export const getInstructorCourses = async (
   token: string
 ) => {
   return axios.get(
-    `${API_URL}/instructor/${instructorId}/courses`,
+    `${API_URL}/courses/${instructorId}/courses`,
     getAuthConfig(token)
   )
 }

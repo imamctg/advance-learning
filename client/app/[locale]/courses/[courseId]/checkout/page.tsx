@@ -216,7 +216,7 @@ const CheckoutPage = () => {
 
       if (paymentType === 'sslcommerz') {
         const response = await axios.post(
-          'http://localhost:5000/api/initiate-payment',
+          'http://localhost:5000/api/payment/initiate-payment',
           {
             amount: course.price,
             courseTitle: course.title,
@@ -235,7 +235,7 @@ const CheckoutPage = () => {
         }
       } else if (paymentType === 'bkash') {
         const response = await axios.post(
-          'http://localhost:5000/api/initiate-bkash',
+          'http://localhost:5000/api/payment/initiate-bkash',
           {
             amount: course.price,
             courseTitle: course.title,

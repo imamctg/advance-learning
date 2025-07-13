@@ -8,6 +8,7 @@ import {
 } from './contact.controller'
 import authMiddleware from '../../middlewares/authMiddleware'
 import { requireRole } from '../../middlewares/roleMiddleware'
+import { rateLimiter } from '../../middlewares/rateLimiter.middleware'
 
 const router = express.Router()
 
@@ -21,7 +22,7 @@ const optionalAuth = async (req: any, res: any, next: any) => {
 }
 
 // ✅ এইভাবে ব্যবহার করুন
-router.post('/', optionalAuth, submitContactForm)
+router.post('/', rateLimiter, optionalAuth, submitContactForm)
 
 // ✅ Admin routes
 router.get('/', optionalAuth, requireRole(['admin']), getAllContactMessages)

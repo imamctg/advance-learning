@@ -229,7 +229,7 @@ const CurriculumPage = ({
       setLoading(true)
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/courses/${courseId}/sections`,
+          `http://localhost:5000/api/courses/${courseId}/sections`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -247,7 +247,7 @@ const CurriculumPage = ({
   const deleteLecture = async (lectureId: string) => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/instructor/lectures/${lectureId}`,
+        `http://localhost:5000/api/courses/lectures/${lectureId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -267,7 +267,7 @@ const CurriculumPage = ({
   const deleteSection = async (sectionId: string) => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/instructor/sections/${sectionId}`,
+        `http://localhost:5000/api/courses/sections/${sectionId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

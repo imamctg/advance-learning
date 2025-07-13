@@ -43,7 +43,7 @@ export const initiateSSLCommerzPayment = async (payload: PaymentPayload) => {
     currency: 'BDT',
     tran_id: transactionId,
     // success_url: `http://localhost:3000/payment/success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}`,
-    success_url: `http://localhost:5000/api/payment-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
+    success_url: `http://localhost:5000/api/payment/payment-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
 
     fail_url: 'http://localhost:3000/payment/fail',
     cancel_url: 'http://localhost:3000/payment/cancel',

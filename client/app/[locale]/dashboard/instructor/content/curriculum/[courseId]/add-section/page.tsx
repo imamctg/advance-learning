@@ -24,7 +24,7 @@ export default function AddSectionPage() {
     setLoading(true)
     try {
       await axios.post(
-        `http://localhost:5000/api/instructor/${courseId}/section`,
+        `http://localhost:5000/api/courses/${courseId}/section`,
         {
           courseId,
           title: sectionName,

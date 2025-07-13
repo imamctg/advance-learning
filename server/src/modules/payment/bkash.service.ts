@@ -58,7 +58,7 @@ export const initiateBkash = async (payload: BkashPayload) => {
       currency: 'BDT',
       intent: 'sale',
       merchantInvoiceNumber: transactionId,
-      callbackURL: `http://localhost:5000/api/bkash-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
+      callbackURL: `http://localhost:5000/api/payment/bkash-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
     },
     {
       headers: {

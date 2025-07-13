@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import cors from 'cors'
 import authRoutes from './modules/auth/auth.routes'
 import courseRoutes from './modules/course/course.routes'
@@ -14,46 +14,55 @@ import contactRoutes from './modules/contact/contact.routes'
 import reviewRoutes from './modules/review/reviews.routes'
 
 import dotenv from 'dotenv'
-import e from 'express'
 import { EarningsRoutes } from './modules/earnings/earnings.routes'
-import { rateLimiter } from './middlewares/rateLimiter.middleware'
 import helmet from 'helmet'
 
-dotenv.config()
+import { globalErrorHandler } from './middlewares/errorHandler'
+import { sanitizeInput } from './middlewares/sanitize.middleware'
 
+dotenv.config()
 const app = express()
 
-// Middleware
-app.use(cors())
+// 2. Security Headers
 app.use(helmet())
+
+app.use(cors())
 app.use(express.json())
-// app.use(rateLimiter)
+app.use(sanitizeInput)
 
 // Routes
+// Auth
 app.use('/api/auth', authRoutes)
-app.use('/api/courses', courseRoutes)
-app.use('/api/lectures', courseRoutes)
-app.use('/api', userRoutes)
-app.use('/api', reviewRoutes)
-app.use('/api/user', userRoutes)
+
+// Users
+// app.use('/api', userRoutes)
+// app.use('/api/user', userRoutes)
+// app.use('/api/users', userRoutes)
 app.use('/api/users', userRoutes)
 
-app.use('/api', paymentRoutes)
+app.use('/api/courses', courseRoutes)
+// app.use('/api/lectures', courseRoutes)
+// app.use('/api/instructor', courseRoutes)
 
-app.use('/api/admin', adminRoutes)
 app.use('/api/messages', messageRoutes)
-app.use('/api/orders', orderRoutes)
+// app.use('/api/instructor', quizRoutes) // instructor-specific routes like course/:courseId, etc.
+app.use('/api/quizzes', quizRoutes) // general quiz routes (lecture/section)
 
-app.use('/api/instructor', courseRoutes)
-app.use('/api/instructor', quizRoutes)
-app.use('/api/quizzes', quizRoutes)
+app.use('/api/reviews', reviewRoutes)
+app.use('/api/contact', contactRoutes)
 app.use('/api/earnings', EarningsRoutes)
 app.use('/api/user', progressRoutes)
-app.use('/api', certificateRoutes)
-app.use('/api/contact', contactRoutes)
+app.use('/api/orders', orderRoutes)
+app.use('/api/payment', paymentRoutes)
+app.use('/api/admin', adminRoutes)
+app.use('/api/certificate', certificateRoutes)
 
+// 🏠 Default Route
 app.get('/', (req, res) => {
   res.send('API is running...! Hello vai')
 })
+
+// 🧯 Global Error Handler
+app.use(globalErrorHandler)
 
 export default app

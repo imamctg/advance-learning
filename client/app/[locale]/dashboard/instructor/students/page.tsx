@@ -4,7 +4,7 @@ import { use, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
-import { s } from 'framer-motion/dist/types.d-CtuPurYT'
+// import { s } from 'framer-motion/dist/types.d-CtuPurYT'
 import { useParams } from 'next/navigation'
 
 interface Student {
@@ -26,7 +26,7 @@ export default function MyCourseStudentsPage() {
     const fetchStudents = async () => {
       try {
         const res = await axios.get(
-          `/api/instructor/courses/${courseId}/students`,
+          `http://localhost:5000/api/courses/${courseId}/students`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

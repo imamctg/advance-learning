@@ -8,15 +8,16 @@ import {
   getReviewsByCourse,
   submitReview,
 } from './review.controller'
+import { rateLimiter } from '../../middlewares/rateLimiter.middleware'
 
 const router = express.Router()
 
 // POST /api/reviews
-router.post('/reviews/submit', authMiddleware, submitReview)
+router.post('/submit', authMiddleware, submitReview)
 
-// GET /api/reviews/:courseId
-router.get('/reviews/:courseId', getReviewsByCourse)
-router.get('/instructor/reviews', authMiddleware, fetchInstructorReviews)
 router.get('/homepage-reviews', fetchHomepageReviews)
+router.get('/instructor', authMiddleware, fetchInstructorReviews)
+// GET /api/reviews/:courseId
+router.get('/:courseId', getReviewsByCourse)
 
 export default router

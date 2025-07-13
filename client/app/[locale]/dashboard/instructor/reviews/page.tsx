@@ -22,14 +22,17 @@ export default function InstructorReviewsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!token) return // 🔒 Prevent unauthorized call
+
     const fetchReviews = async () => {
       try {
         const res = await axios.get(
-          'http://localhost:5000/api/instructor/reviews',
+          'http://localhost:5000/api/reviews/instructor',
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         )
+        console.log(res.data, 'res.data')
         setReviews(res.data)
       } catch (error) {
         console.error(error)
@@ -40,8 +43,8 @@ export default function InstructorReviewsPage() {
     }
 
     fetchReviews()
-  }, [])
-
+  }, [token])
+  console.log(reviews, 'reviews')
   return (
     <div className='p-6'>
       <h2 className='text-3xl font-semibold mb-6'>⭐ Student Reviews</h2>
