@@ -65,7 +65,7 @@ export default function AccountSettingsPage() {
       const userId = user?.id || user?._id
 
       const res = await axios.put(
-        `http://localhost:5000/api/user/${userId}`,
+        `http://localhost:5000/api/users/${userId}`,
         formData,
         {
           headers: {

@@ -101,7 +101,14 @@ export const addCourseToUserService = async (
 
 // ইউজারের কোর্সগুলো পাওয়া
 export const getUserCoursesService = async (userId: string) => {
-  const user = await User.findById(userId).populate('purchasedCourses')
+  const user = await User.findById(userId).populate({
+    path: 'purchasedCourses',
+    populate: {
+      path: 'instructor',
+      select: 'name',
+    },
+  })
+
   if (!user) return null
   return user.purchasedCourses
 }
