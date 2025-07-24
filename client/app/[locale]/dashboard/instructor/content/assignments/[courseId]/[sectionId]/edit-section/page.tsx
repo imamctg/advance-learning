@@ -7,12 +7,13 @@ import axios from 'axios'
 import { RootState } from 'features/redux/store'
 import { toast } from 'react-hot-toast'
 
-const EditSectionPage = ({
-  params,
-}: {
-  params: { courseId: string; sectionId: string }
-}) => {
-  const { courseId, sectionId } = useParams()
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+const EditSectionPage = () => {
+  const { courseId, sectionId } = useParams() as {
+    courseId: string
+    sectionId: string
+  }
   const token = useSelector((state: RootState) => state.auth.token)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -26,7 +27,7 @@ const EditSectionPage = ({
       if (!token) return
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/sections/${sectionId}`,
+          `${baseURL}/courses/sections/${sectionId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -56,16 +57,12 @@ const EditSectionPage = ({
       formData.append('isPublished', JSON.stringify(isPublished))
       if (resourceFile) formData.append('resourceFile', resourceFile)
 
-      await axios.put(
-        `http://localhost:5000/api/instructor/sections/${sectionId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      )
+      await axios.put(`${baseURL}/courses/sections/${sectionId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      })
 
       toast.success('Section updated successfully')
       router.push(`/dashboard/instructor/content/curriculum/${courseId}`)

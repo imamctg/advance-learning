@@ -2,7 +2,6 @@
 import axios from 'axios'
 import { Button } from 'components/ui/button'
 import { RootState } from 'features/redux/store'
-import { u } from 'framer-motion/dist/types.d-CtuPurYT'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'

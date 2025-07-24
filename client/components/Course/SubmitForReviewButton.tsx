@@ -1,15 +1,18 @@
-// src/components/course/SubmitForReviewButton.tsx
-// import { submitForReview } from '@/services/courseService';
+'use client'
+
 import { submitForReview } from 'app/[locale]/services/courseService'
 import { useRouter } from 'next/router'
+import { useSelector } from 'react-redux'
+import { RootState } from 'features/redux/store'
 
 const SubmitForReviewButton = ({ courseId }: { courseId: string }) => {
   const router = useRouter()
+  const token = useSelector((state: RootState) => state.auth.token)
 
   const handleSubmit = async () => {
     try {
-      await submitForReview(courseId)
-      router.reload() // Or update state to reflect the new status
+      await submitForReview(courseId, token) // ✅ ২টি argument পাঠানো হলো
+      router.reload()
       alert('Course submitted for review successfully!')
     } catch (error) {
       alert('Failed to submit course for review')
@@ -25,3 +28,5 @@ const SubmitForReviewButton = ({ courseId }: { courseId: string }) => {
     </button>
   )
 }
+
+export default SubmitForReviewButton

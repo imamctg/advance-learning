@@ -21,10 +21,9 @@ const AssignmentCourseListPage = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get(
-          `${baseURL}/instructor/${user.id}/courses`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
+        const res = await axios.get(`${baseURL}/courses/${user.id}/courses`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         setCourses(res.data.courses || [])
       } catch (err) {
         console.error('Failed to load courses')

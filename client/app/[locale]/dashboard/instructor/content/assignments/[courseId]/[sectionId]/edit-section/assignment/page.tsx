@@ -1,18 +1,20 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
 import { RootState } from 'features/redux/store'
 import { toast } from 'react-hot-toast'
 
-const EditSectionAssignmentPage = ({
-  params,
-}: {
-  params: { courseId: string; sectionId: string }
-}) => {
-  const { courseId, sectionId } = useParams()
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+const EditSectionAssignmentPage = () => {
+  const { courseId, sectionId } = useParams() as {
+    courseId: string
+    sectionId: string
+  }
+
   const token = useSelector((state: RootState) => state.auth.token)
   const router = useRouter()
 
@@ -26,7 +28,7 @@ const EditSectionAssignmentPage = ({
     const fetchAssignment = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/sections/${sectionId}/assignment`,
+          `${baseURL}/courses/sections/${sectionId}/assignment`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -35,7 +37,7 @@ const EditSectionAssignmentPage = ({
         if (assignment) {
           setTitle(assignment.title)
           setInstructions(assignment.instructions)
-          setDueDate(assignment.dueDate?.substring(0, 10)) // for date input
+          setDueDate(assignment.dueDate?.substring(0, 10))
           setTotalMarks(assignment.totalMarks)
         }
       } catch {
@@ -54,7 +56,7 @@ const EditSectionAssignmentPage = ({
     setLoading(true)
     try {
       await axios.put(
-        `http://localhost:5000/api/instructor/sections/${sectionId}/assignment`,
+        `${baseURL}/courses/sections/${sectionId}/assignment`,
         {
           title,
           instructions,
