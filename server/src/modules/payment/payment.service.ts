@@ -5,6 +5,8 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
+const CLIENT_URL = process.env.CLIENT_URL
+const SERVER_URL = process.env.SERVER_URL
 const store_id = process.env.SSLCOMMERZ_STORE_ID as string
 const store_passwd = process.env.SSLCOMMERZ_STORE_PASSWD as string
 const is_live = process.env.SSLCOMMERZ_IS_LIVE === 'true'
@@ -42,12 +44,11 @@ export const initiateSSLCommerzPayment = async (payload: PaymentPayload) => {
     total_amount: amount,
     currency: 'BDT',
     tran_id: transactionId,
-    // success_url: `http://localhost:3000/payment/success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}`,
-    success_url: `http://localhost:5000/api/payment/payment-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
+    success_url: `${SERVER_URL}/api/payment/payment-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
 
-    fail_url: 'http://localhost:3000/payment/fail',
-    cancel_url: 'http://localhost:3000/payment/cancel',
-    ipn_url: 'http://localhost:5000/ipn',
+    fail_url: `${CLIENT_URL}/payment/fail`,
+    cancel_url: `${CLIENT_URL}/payment/cancel`,
+    ipn_url: `${SERVER_URL}/ipn`,
     shipping_method: 'NO',
     product_name: courseTitle,
     product_category: 'Education',

@@ -4,7 +4,7 @@ import axios from 'axios'
 import dotenv from 'dotenv'
 
 dotenv.config()
-
+const SERVER_URL = process.env.SERVER_URL
 const BKASH_BASE_URL = process.env.BKASH_BASE_URL
 const BKASH_APP_KEY = process.env.BKASH_APP_KEY
 const BKASH_APP_SECRET = process.env.BKASH_APP_SECRET
@@ -58,7 +58,7 @@ export const initiateBkash = async (payload: BkashPayload) => {
       currency: 'BDT',
       intent: 'sale',
       merchantInvoiceNumber: transactionId,
-      callbackURL: `http://localhost:5000/api/payment/bkash-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
+      callbackURL: `${SERVER_URL}/api/payment/bkash-success?tran_id=${transactionId}&userId=${userId}&courseId=${courseId}&orderId=${orderId}`,
     },
     {
       headers: {

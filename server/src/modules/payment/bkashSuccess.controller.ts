@@ -5,6 +5,11 @@ import { OrderService } from '../order/order.service'
 import Course from '../course/course.model'
 import User from '../user/user.model'
 import { Types } from 'mongoose'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const CLIENT_URL = process.env.CLIENT_URL
 
 export const bkashSuccess = async (
   req: Request,
@@ -50,7 +55,7 @@ export const bkashSuccess = async (
 
     // Step 4: Redirect to success page
     res.redirect(
-      `http://localhost:3000/payment/success?tran_id=${tran_id}&userId=${userId}&courseId=${courseId}`
+      `${CLIENT_URL}/payment/success?tran_id=${tran_id}&userId=${userId}&courseId=${courseId}`
     )
   } catch (error) {
     console.error('bKash success error:', error)
