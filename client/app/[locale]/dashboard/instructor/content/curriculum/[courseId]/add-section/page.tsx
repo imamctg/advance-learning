@@ -10,6 +10,7 @@ import { Label } from 'components/ui/label'
 import { RootState } from 'features/redux/store'
 import { useSelector } from 'react-redux'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function AddSectionPage() {
   const token = useSelector((state: RootState) => state.auth.token)
   const { courseId } = useParams()
@@ -24,7 +25,7 @@ export default function AddSectionPage() {
     setLoading(true)
     try {
       await axios.post(
-        `http://localhost:5000/api/courses/${courseId}/section`,
+        `${baseURL}/courses/${courseId}/section`,
         {
           courseId,
           title: sectionName,

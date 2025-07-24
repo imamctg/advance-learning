@@ -14,7 +14,6 @@ import {
   submitForReview,
 } from 'app/[locale]/services/courseService'
 import StatusBadge from 'components/Course/StatusBadge'
-import AdminNotes from 'components/Course/AdminNotes'
 
 const InstructorCourses = () => {
   const [courses, setCourses] = useState<any[]>([])

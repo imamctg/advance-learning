@@ -4,17 +4,10 @@ import { use, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
-// import { s } from 'framer-motion/dist/types.d-CtuPurYT'
 import { useParams } from 'next/navigation'
+import { Student } from 'types/student'
 
-interface Student {
-  _id: string
-  name: string
-  email: string
-  profileImage?: string
-  role: string
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function MyCourseStudentsPage() {
   const token = useSelector((state: RootState) => state.auth.token)
   const [students, setStudents] = useState<Student[]>([])
@@ -25,14 +18,11 @@ export default function MyCourseStudentsPage() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/courses/${courseId}/students`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
+        const res = await axios.get(`${baseURL}/courses/${courseId}/students`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
 
-        console.log('API Response:', res.data) // বিস্তারিত রেসপন্স লগ করুন
+        console.log('API Response:', res.data)
 
         if (res?.data?.success) {
           setStudents(res?.data?.students)
@@ -57,7 +47,7 @@ export default function MyCourseStudentsPage() {
     if (token) {
       fetchStudents()
     } else {
-      console.error('No token found') // টোকেন নেই এমন ক্ষেত্রে হ্যান্ডেল করুন
+      console.error('No token found')
       setLoading(false)
     }
   }, [token])

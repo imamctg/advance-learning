@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = 'http://localhost:5000/api'
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 // Common headers config
 const getAuthConfig = (token: string) => ({
@@ -13,7 +13,7 @@ const getAuthConfig = (token: string) => ({
 // Course Status Management
 export const submitForReview = async (courseId: string, token: string) => {
   return axios.post(
-    `${API_URL}/courses/${courseId}/submit`,
+    `${baseURL}/courses/${courseId}/submit`,
     {},
     getAuthConfig(token)
   )
@@ -26,10 +26,10 @@ export const reviewCourse = async (
   notes?: string
 ) => {
   return axios.post(
-    `${API_URL}/courses/${courseId}/review`,
+    `${baseURL}/courses/${courseId}/review`,
     {
       decision,
-      notes: notes || '', // Ensure notes is always a string
+      notes: notes || '',
     },
     {
       headers: {
@@ -42,22 +42,18 @@ export const reviewCourse = async (
 
 export const publishCourse = async (courseId: string, token: string) => {
   return axios.post(
-    `${API_URL}/courses/${courseId}/publish`,
+    `${baseURL}/courses/${courseId}/publish`,
     {},
     getAuthConfig(token)
   )
 }
 
 export const archiveCourse = async (courseId: string, token: string) => {
-  return axios.post(`${API_URL}/${courseId}/archive`, {}, getAuthConfig(token))
+  return axios.post(`${baseURL}/${courseId}/archive`, {}, getAuthConfig(token))
 }
 
-// export const getCoursesByStatus = async (status: string, token: string) => {
-//   return axios.get(`${API_URL}/status/${status}`, getAuthConfig(token))
-// }
-
 export const getCoursesByStatus = async (status: string, token: string) => {
-  return axios.get(`${API_URL}/courses/status/${status}`, getAuthConfig(token))
+  return axios.get(`${baseURL}/courses/status/${status}`, getAuthConfig(token))
 }
 
 // Other course operations
@@ -66,14 +62,14 @@ export const getInstructorCourses = async (
   token: string
 ) => {
   return axios.get(
-    `${API_URL}/courses/${instructorId}/courses`,
+    `${baseURL}/courses/${instructorId}/courses`,
     getAuthConfig(token)
   )
 }
 
 export const getCourseDetails = async (courseId: string, token: string) => {
   return axios.get(
-    `${API_URL}/courses/${courseId}/details`,
+    `${baseURL}/courses/${courseId}/details`,
     getAuthConfig(token)
   )
 }
@@ -83,27 +79,15 @@ export const updateCourse = async (
   data: any,
   token: string
 ) => {
-  return axios.put(`${API_URL}/courses/${courseId}`, data, getAuthConfig(token))
+  return axios.put(`${baseURL}/courses/${courseId}`, data, getAuthConfig(token))
 }
 
 export const getAdminNotes = async (courseId: string, token: string) => {
   return axios.get(
-    `${API_URL}/courses/${courseId}/admin-notes`,
+    `${baseURL}/courses/${courseId}/admin-notes`,
     getAuthConfig(token)
   )
 }
-
-// export const resubmitCourse = async (
-//   courseId: string,
-//   responseNote: string,
-//   token: string
-// ) => {
-//   return axios.post(
-//     `${API_URL}/courses/${courseId}/resubmit`,
-//     { responseNote },
-//     getAuthConfig(token)
-//   )
-// }
 
 export const resubmitCourse = async (
   courseId: string,
@@ -111,12 +95,12 @@ export const resubmitCourse = async (
   token: string
 ) => {
   return axios.post(
-    `${API_URL}/courses/${courseId}/resubmit`,
+    `${baseURL}/courses/${courseId}/resubmit`,
     { responseNote },
     {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json', // Add this line
+        'Content-Type': 'application/json',
       },
     }
   )

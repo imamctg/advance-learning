@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
 import Link from 'next/link'
-import toast from 'react-hot-toast'
-import { getInstructorCourses } from 'app/[locale]/services/courseService'
+
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const InstructorDashboard = () => {
   const [stats, setStats] = useState({
@@ -24,12 +24,9 @@ const InstructorDashboard = () => {
       if (!user?.id || !token) return
 
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/courses/${user.id}/courses`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
+        const res = await axios.get(`${baseURL}/courses/${user.id}/courses`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
 
         const courses = res.data.courses || []
         console.log(courses, '🔥 courses')
@@ -55,7 +52,7 @@ const InstructorDashboard = () => {
 
         // 🔹 Get earnings
         const resEarnings = await axios.get(
-          `http://localhost:5000/api/earnings/instructor`,
+          `${baseURL}/earnings/instructor`,
 
           { headers: { Authorization: `Bearer ${token}` } }
         )

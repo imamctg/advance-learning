@@ -8,6 +8,8 @@ import instructorForm from './instructorForm.json'
 import studentForm from './studentForm.json'
 import login from './login.json'
 import footer from './footer.json'
+import forgotPassword from './forgotPassword.json'
+import resetPassword from './resetPassword.json'
 export default {
   navbar,
   home,
@@ -19,4 +21,6 @@ export default {
   studentForm,
   login,
   footer,
+  forgotPassword,
+  resetPassword,
 }

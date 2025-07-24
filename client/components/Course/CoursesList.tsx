@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const CoursesList = () => {
   const [courses, setCourses] = useState([])
   const router = useRouter()
@@ -11,7 +12,7 @@ const CoursesList = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/courses', {
+      .get(`${baseURL}/courses`, {
         params: {
           status: 'published',
         },

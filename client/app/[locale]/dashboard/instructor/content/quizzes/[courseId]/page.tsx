@@ -6,15 +6,17 @@ import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
 import { useParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
+import { Quiz } from 'types/quiz'
 
-interface Quiz {
-  _id: string
-  title: string
-  course: string
-  lecture?: string
-  section?: string
-}
+// interface Quiz {
+//   _id: string
+//   title: string
+//   course: string
+//   lecture?: string
+//   section?: string
+// }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const QuizzesPage = () => {
   const { courseId } = useParams()
   const token = useSelector((state: RootState) => state.auth.token)
@@ -22,109 +24,16 @@ const QuizzesPage = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
   const [loading, setLoading] = useState(false)
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!token || !courseId) return
-  //     setLoading(true)
-  //     try {
-  //       const [sectionsRes, quizzesRes] = await Promise.all([
-  //         axios.get(
-  //           `http://localhost:5000/api/instructor/courses/${courseId}/sections`,
-  //           {
-  //             headers: { Authorization: `Bearer ${token}` },
-  //           }
-  //         ),
-  //         axios.get(`http://localhost:5000/api/quizzes/course/${courseId}`, {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }),
-  //       ])
-
-  //       // সার্ভার রেসপন্স লগ করুন
-  //       console.log('Raw server response - sections:', sectionsRes.data)
-  //       console.log('Raw server response - quizzes:', quizzesRes.data)
-
-  //       // ডাটা স্ট্রাকচার ভ্যালিডেশন
-  //       const validatedQuizzes = (quizzesRes.data.quizzes || []).map(
-  //         (quiz: any) => ({
-  //           _id: quiz._id,
-  //           title: quiz.title,
-  //           lecture: quiz.lecture || undefined,
-  //           section: quiz.section || undefined,
-  //           course: quiz.course,
-  //           lectureTitle: quiz.lectureTitle || undefined,
-  //           sectionTitle: quiz.sectionTitle || undefined,
-  //         })
-  //       )
-
-  //       setSections(sectionsRes.data.sections || [])
-  //       setQuizzes(validatedQuizzes)
-  //     } catch (err) {
-  //       console.error('Error fetching data:', err)
-  //       toast.error('Failed to load data')
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-  //   fetchData()
-  // }, [token, courseId])
-
-  // স্টেট মনিটরিং
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!token || !courseId) return
-  //     setLoading(true)
-  //     try {
-  //       const [sectionsRes, quizzesRes] = await Promise.all([
-  //         axios.get(
-  //           `http://localhost:5000/api/instructor/courses/${courseId}/sections`,
-  //           {
-  //             headers: { Authorization: `Bearer ${token}` },
-  //           }
-  //         ),
-  //         axios.get(`http://localhost:5000/api/quizzes/course/${courseId}`, {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }),
-  //       ])
-
-  //       console.log('Raw server response - sections:', sectionsRes.data)
-  //       console.log('Raw server response - quizzes:', quizzesRes.data)
-
-  //       // ডাটা স্ট্রাকচার ভ্যালিডেশন
-  //       const validatedQuizzes = (quizzesRes.data.quizzes || []).map(
-  //         (quiz: any) => ({
-  //           _id: quiz._id,
-  //           title: quiz.title,
-  //           lecture: quiz.lecture || undefined,
-  //           section: quiz.section || undefined,
-  //           course: quiz.course,
-  //           lectureTitle: quiz.lectureTitle || undefined,
-  //           sectionTitle: quiz.sectionTitle || undefined,
-  //         })
-  //       )
-
-  //       setSections(sectionsRes.data.sections || [])
-  //       setQuizzes(validatedQuizzes)
-  //     } catch (err) {
-  //       console.error('Error fetching data:', err)
-  //       toast.error('Failed to load data')
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-  //   fetchData()
-  // }, [token, courseId])
-
   useEffect(() => {
     const fetchData = async () => {
       if (!token || !courseId) return
       setLoading(true)
       try {
         const [sectionsRes, quizzesRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/courses/${courseId}/sections`, {
+          axios.get(`${baseURL}/courses/${courseId}/sections`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:5000/api/quizzes/course/${courseId}`, {
+          axios.get(`${baseURL}/quizzes/course/${courseId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ])
@@ -151,7 +60,7 @@ const QuizzesPage = () => {
   const deleteQuiz = async (quizId: string) => {
     if (!confirm('Are you sure you want to delete this quiz?')) return
     try {
-      await axios.delete(`http://localhost:5000/api/quizzes/${quizId}`, {
+      await axios.delete(`${baseURL}/quizzes/${quizId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       toast.success('Quiz deleted successfully')
@@ -161,15 +70,6 @@ const QuizzesPage = () => {
     }
   }
 
-  const getLectureQuizzes = (lectureId: string) => {
-    return quizzes.filter((q) => q.lecture === lectureId)
-  }
-
-  const getSectionQuiz = (sectionId: string) => {
-    return quizzes.find((q) => q.section === sectionId)
-  }
-  console.log(sections, 'sections1')
-  console.log(quizzes, 'quizzes1')
   return (
     <div className='p-6 max-w-5xl mx-auto'>
       <div className='flex justify-between items-center mb-6'>

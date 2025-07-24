@@ -7,11 +7,12 @@ type Props = {
   courseId: string
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const CertificateDownloadButton: React.FC<Props> = ({ userId, courseId }) => {
   const handleDownload = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/certificate/${encodeURIComponent(
+        `${baseURL}/certificate/${encodeURIComponent(
           userId
         )}/${encodeURIComponent(courseId)}`
       )

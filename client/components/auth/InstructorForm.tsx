@@ -329,6 +329,7 @@ import toast from 'react-hot-toast'
 import PasswordHints from './PasswordHints'
 import ReCAPTCHA from 'react-google-recaptcha'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function InstructorForm() {
   const t = useTranslations('instructorForm')
   const router = useRouter()
@@ -389,7 +390,7 @@ export default function InstructorForm() {
       formData.append('token', recaptchaToken)
       if (nidFile) formData.append('nidFile', nidFile)
 
-      await axios.post('http://localhost:5000/api/auth/register', formData)
+      await axios.post(`${baseURL}/auth/register`, formData)
       toast.success('Instructor registration successful!')
       router.push(`/auth/login?redirect=${redirectPath}`)
     } catch (error: any) {

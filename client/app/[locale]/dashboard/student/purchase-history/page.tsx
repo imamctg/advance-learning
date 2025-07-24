@@ -1,27 +1,12 @@
-// app/dashboard/student/purchase-history/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import { RootState } from 'features/redux/store'
+import { Purchase } from 'types/purchase-history'
 
-interface Course {
-  _id: string
-  title: string
-}
-
-interface Purchase {
-  _id: string
-  courseId: Course | null // Updated to allow null
-  courseTitle?: string // Optional field
-  paymentType: string
-  amount: number
-  status: string
-  transactionId: string
-  createdAt: string
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function PurchaseHistoryPage() {
   const [purchases, setPurchases] = useState<Purchase[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,9 +16,7 @@ export default function PurchaseHistoryPage() {
     const fetchPurchases = async () => {
       if (!user?.id) return
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/orders/${user.id}`
-        )
+        const res = await axios.get(`${baseURL}/orders/${user.id}`)
         setPurchases(res.data)
       } catch (err) {
         console.error('Failed to fetch purchases', err)

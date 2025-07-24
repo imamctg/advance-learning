@@ -34,6 +34,7 @@ interface Section {
   assignment?: Assignment
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const AssignmentPage = ({
   params,
 }: {
@@ -50,7 +51,7 @@ const AssignmentPage = ({
       setLoading(true)
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/courses/${courseId}/sections`,
+          `${baseURL}/instructor/courses/${courseId}/sections`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -64,57 +65,6 @@ const AssignmentPage = ({
     }
     fetchSections()
   }, [token, courseId])
-
-  const deleteLecture = async (lectureId: string) => {
-    try {
-      await axios.delete(
-        `http://localhost:5000/api/instructor/lectures/${lectureId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      setSections((prev) =>
-        prev.map((s) => ({
-          ...s,
-          lectures: s.lectures.filter((l) => l._id !== lectureId),
-        }))
-      )
-      toast.success('Lecture deleted')
-    } catch {
-      toast.error('Failed to delete lecture')
-    }
-  }
-
-  const deleteSection = async (sectionId: string) => {
-    try {
-      await axios.delete(
-        `http://localhost:5000/api/instructor/sections/${sectionId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      setSections((prev) => prev.filter((s) => s._id !== sectionId))
-      toast.success('Section deleted')
-    } catch {
-      toast.error('Failed to delete section')
-    }
-  }
-
-  const deleteQuiz = async (quizId: string) => {
-    try {
-      await axios.delete(
-        `http://localhost:5000/api/instructor/quizzes/${quizId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      toast.success('Quiz deleted')
-      // Refresh can be optimized later
-      window.location.reload()
-    } catch {
-      toast.error('Failed to delete quiz')
-    }
-  }
 
   const deleteAssignment = async (assignmentId: string) => {
     try {

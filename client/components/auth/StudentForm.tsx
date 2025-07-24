@@ -248,6 +248,7 @@ import PasswordHints from './PasswordHints'
 import ReCAPTCHA from 'react-google-recaptcha'
 import { useTranslations } from 'next-intl'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function StudentForm() {
   const t = useTranslations('studentForm')
   const router = useRouter()
@@ -286,7 +287,7 @@ export default function StudentForm() {
     try {
       setSubmitting(true)
 
-      await axios.post('http://localhost:5000/api/auth/register', {
+      await axios.post(`${baseURL}/auth/register`, {
         name,
         email,
         password,

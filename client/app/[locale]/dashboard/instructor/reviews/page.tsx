@@ -6,16 +6,9 @@ import { toast } from 'react-hot-toast'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
+import { Review } from 'types/review'
 
-interface Review {
-  _id: string
-  studentName: string
-  rating: number
-  comment: string
-  courseTitle: string
-  createdAt: string
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function InstructorReviewsPage() {
   const token = useSelector((state: RootState) => state.auth.token)
   const [reviews, setReviews] = useState<Review[]>([])
@@ -26,12 +19,9 @@ export default function InstructorReviewsPage() {
 
     const fetchReviews = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:5000/api/reviews/instructor',
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
+        const res = await axios.get(`${baseURL}/reviews/instructor`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         console.log(res.data, 'res.data')
         setReviews(res.data)
       } catch (error) {

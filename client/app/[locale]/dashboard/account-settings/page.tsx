@@ -8,6 +8,7 @@ import { updateUser } from 'features/auth/redux/authSlice'
 import { Eye, EyeOff } from 'lucide-react'
 import { RootState } from 'features/redux/store'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function AccountSettingsPage() {
   const dispatch = useDispatch()
   const user = useSelector((state: any) => state.auth.user)
@@ -64,16 +65,12 @@ export default function AccountSettingsPage() {
 
       const userId = user?.id || user?._id
 
-      const res = await axios.put(
-        `http://localhost:5000/api/user/${userId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      )
+      const res = await axios.put(`${baseURL}/user/${userId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      })
 
       const updatedUser = res.data.user
       const storedToken = localStorage.getItem('user')

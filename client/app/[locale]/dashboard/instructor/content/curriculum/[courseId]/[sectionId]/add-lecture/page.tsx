@@ -1,5 +1,3 @@
-// client/app/admin/dashboard/courses/[courseId]/sections/[sectionId]/add-lecture/page.tsx
-
 'use client'
 
 import AddLectureForm from 'components/Course/AddLectureForm'

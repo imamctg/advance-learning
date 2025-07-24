@@ -1,4 +1,3 @@
-// src/app/dashboard/admin/courses/review/page.tsx
 'use client'
 
 import { getCoursesByStatus } from 'app/[locale]/services/courseService'
@@ -7,8 +6,6 @@ import { RootState } from 'features/redux/store'
 import { useState, useEffect, use } from 'react'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-hot-toast'
-// import { getCoursesByStatus } from '@/services/courseService';
-// import ReviewCourseModal from '@/components/admin/ReviewCourseModal';
 
 export default function AdminReviewQueuePage() {
   const token = useSelector((state: RootState) => state.auth.token)

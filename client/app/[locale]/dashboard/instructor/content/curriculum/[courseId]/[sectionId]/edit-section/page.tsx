@@ -7,6 +7,7 @@ import axios from 'axios'
 import { RootState } from 'features/redux/store'
 import { toast } from 'react-hot-toast'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const EditSectionPage = () => {
   const { courseId, sectionId } = useParams() as {
     courseId: string
@@ -24,12 +25,9 @@ const EditSectionPage = () => {
     const fetchSection = async () => {
       if (!token || !courseId || !sectionId) return
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/courses/${courseId}/sections`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
+        const res = await axios.get(`${baseURL}/courses/${courseId}/sections`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
 
         const allSections = res.data.sections || []
         const matchedSection = allSections.find((s: any) => s._id === sectionId)
@@ -65,7 +63,7 @@ const EditSectionPage = () => {
       if (resourceFile) formData.append('resourceFile', resourceFile)
 
       await axios.put(
-        `http://localhost:5000/api/instructor/courses/${courseId}/sections/${sectionId}`,
+        `${baseURL}/instructor/courses/${courseId}/sections/${sectionId}`,
         formData,
         {
           headers: {

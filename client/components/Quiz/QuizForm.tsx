@@ -20,6 +20,8 @@ type QuizFormProps = {
   onSuccess?: () => void
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 const QuizForm: React.FC<QuizFormProps> = ({
   initialData,
   parentId,
@@ -42,8 +44,8 @@ const QuizForm: React.FC<QuizFormProps> = ({
 
   const apiBase =
     parentType === 'section'
-      ? `http://localhost:5000/api/quizzes/sections/${parentId}`
-      : `http://localhost:5000/api/quizzes/lectures/${parentId}`
+      ? `${baseURL}/quizzes/sections/${parentId}`
+      : `${baseURL}/quizzes/lectures/${parentId}`
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -110,53 +112,12 @@ const QuizForm: React.FC<QuizFormProps> = ({
     return true
   }
 
-  // const handleSubmit = async () => {
-  //   // console.log('Sending courseId:', courseId)
-  //   // console.log('Payload:', {
-  //   //   title,
-  //   //   instructions,
-  //   //   duration,
-  //   //   totalMarks,
-  //   //   questions,
-  //   //   course: courseId,
-  //   // })
-
-  //   if (!validateForm()) return
-  //   setLoading(true)
-  //   try {
-  //     const method = isEditing ? 'put' : 'post'
-  //     const res = await axios[method](
-  //       apiBase,
-  //       {
-  //         title,
-  //         instructions,
-  //         duration,
-  //         totalMarks,
-  //         questions,
-  //         course: courseId, // ✅ courseId now included
-  //       },
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     )
-  //     toast.success(`Quiz ${isEditing ? 'updated' : 'created'} successfully!`)
-  //     onSuccess?.()
-  //   } catch (err) {
-  //     toast.error(`Failed to ${isEditing ? 'update' : 'create'} quiz.`)
-  //     console.error(err)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
   const handleSubmit = async () => {
     if (!validateForm()) return
     setLoading(true)
     try {
       const method = isEditing ? 'put' : 'post'
-      const url = isEditing
-        ? `http://localhost:5000/api/quizzes/${initialData?._id}`
-        : apiBase
+      const url = isEditing ? `${baseURL}/quizzes/${initialData?._id}` : apiBase
 
       const res = await axios[method](
         url,
@@ -182,30 +143,11 @@ const QuizForm: React.FC<QuizFormProps> = ({
     }
   }
 
-  // const handleDelete = async () => {
-  //   if (!confirm('Are you sure you want to delete this quiz?')) return
-  //   setLoading(true)
-  //   try {
-  //     await axios.delete(apiBase, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     toast.success('Quiz deleted successfully!')
-  //     onSuccess?.()
-  //   } catch (err) {
-  //     toast.error('Failed to delete quiz.')
-  //     console.error(err)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this quiz?')) return
     setLoading(true)
     try {
-      const url = isEditing
-        ? `http://localhost:5000/api/quizzes/${initialData?._id}`
-        : apiBase
+      const url = isEditing ? `${baseURL}/quizzes/${initialData?._id}` : apiBase
 
       await axios.delete(url, {
         headers: { Authorization: `Bearer ${token}` },

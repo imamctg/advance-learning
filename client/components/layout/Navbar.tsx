@@ -188,25 +188,6 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* 🌐 Language Switcher - Desktop */}
-          {/* <div className='relative group'>
-            <button className='text-sm font-medium text-gray-600 hover:text-indigo-600'>
-              🌐 {locale.toUpperCase()}
-            </button>
-            <div className='absolute mt-2 w-24 bg-white rounded shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-40'>
-              {['en', 'bn'].map((lng) => (
-                <button
-                  key={lng}
-                  onClick={() => handleChangeLocale(lng)}
-                  className={`block w-full px-4 py-2 text-left hover:bg-gray-100 ${
-                    locale === lng ? 'font-bold text-indigo-600' : ''
-                  }`}
-                >
-                  {lng === 'en' ? 'English' : 'বাংলা'}
-                </button>
-              ))}
-            </div>
-          </div> */}
           <div className='hidden md:flex items-center gap-4'>
             <LanguageSwitcher />
           </div>
@@ -305,28 +286,6 @@ export default function Navbar() {
             </>
           )}
 
-          {/* 🌐 Language Switcher - Mobile */}
-          {/* <div className='border-t border-gray-200 mt-2 pt-2'>
-            <p className='text-sm text-gray-500 mb-1'>🌐 Language</p>
-            <div className='flex justify-center gap-4'>
-              {['en', 'bn'].map((lng) => (
-                <button
-                  key={lng}
-                  onClick={() => {
-                    handleChangeLocale(lng)
-                    setMenuOpen(false)
-                  }}
-                  className={`px-3 py-1 rounded text-sm border ${
-                    locale === lng
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-700'
-                  }`}
-                >
-                  {lng === 'en' ? 'EN' : 'বাংলা'}
-                </button>
-              ))}
-            </div>
-          </div> */}
           <div className='border-t border-gray-200 mt-2 pt-2'>
             <LanguageSwitcher />
           </div>

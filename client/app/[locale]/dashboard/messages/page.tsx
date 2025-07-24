@@ -3,20 +3,12 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
+import { Message } from 'types/message'
 
-interface Message {
-  _id: string
-  text: string
-  sentAt: string
-}
-
-// const userId = 'USER_ID_HERE' // ✅ আপনি যেভাবে userId পাচ্ছেন (Redux/Auth context etc.) সেটা বসান
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export default function MessagePage() {
   const userId = useSelector((state: any) => state.auth.user?.id)
-
-  // const user = useSelector((state: any) => state.auth.user)
-  // console.log('👤 Redux User Object:', user)
 
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,9 +18,7 @@ export default function MessagePage() {
     if (!userId) return
     const fetchMessages = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/admin/message/${userId}`
-        )
+        const res = await axios.get(`${baseURL}/admin/message/${userId}`)
         setMessages(res.data)
         console.log('📥 Messages Frontend:', res.data)
       } catch (err: any) {

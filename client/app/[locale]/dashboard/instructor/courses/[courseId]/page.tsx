@@ -13,6 +13,7 @@ import { Label } from 'components/ui/label'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function EditCoursePage() {
   const token = useSelector((state: RootState) => state.auth.token)
   const { courseId } = useParams()
@@ -35,9 +36,7 @@ export default function EditCoursePage() {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/courses/${courseId}`
-        )
+        const res = await axios.get(`${baseURL}/courses/${courseId}`)
         setCourse(res.data.data)
       } catch (error) {
         console.error('Error loading course', error)
@@ -82,16 +81,12 @@ export default function EditCoursePage() {
         formData.append('thumbnail', thumbnailFile)
       }
 
-      await axios.put(
-        `http://localhost:5000/api/courses/${courseId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      )
+      await axios.put(`${baseURL}/courses/${courseId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      })
 
       toast.success('Course updated successfully!')
       router.push(`/dashboard/instructor/courses`)

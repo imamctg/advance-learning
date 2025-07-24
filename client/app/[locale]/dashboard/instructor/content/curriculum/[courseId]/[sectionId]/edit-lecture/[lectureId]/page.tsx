@@ -13,6 +13,7 @@ import { RootState } from 'features/redux/store'
 import { LectureResource } from 'types/lecture'
 import { Loader2 } from 'lucide-react'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function EditLecturePage() {
   const token = useSelector((state: RootState) => state.auth.token)
   const [resources, setResources] = useState<LectureResource[]>([])
@@ -36,7 +37,7 @@ export default function EditLecturePage() {
     const fetchLecture = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
+          `${baseURL}/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -72,61 +73,6 @@ export default function EditLecturePage() {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
   }
-
-  // const handleUpdate = async () => {
-  //   if (!form.title.trim()) return toast.error('Title is required')
-
-  //   try {
-  //     setIsSubmitting(true)
-  //     setProgress({ percentage: 0, message: 'Preparing files...' })
-
-  //     const formData = new FormData()
-  //     formData.append('title', form.title)
-  //     formData.append('description', form.description)
-
-  //     // Count total files for progress calculation
-  //     let totalFiles = videoFile ? 1 : 0
-  //     resources.forEach((resource) => {
-  //       if (resource.type === 'file' && resource.file) {
-  //         totalFiles++
-  //       }
-  //     })
-
-  //     let uploadedFiles = 0
-
-  //     if (videoFile) {
-  //       formData.append('video', videoFile)
-  //       uploadedFiles++
-  //       setProgress({
-  //         percentage: Math.round((uploadedFiles / totalFiles) * 100),
-  //         message: 'Uploading lecture video...',
-  //       })
-  //     }
-
-  //     // Append resources with proper field names
-  //     resources.forEach((resource, index) => {
-  //       if (resource.type === 'file' && resource.file) {
-  //         formData.append(`resources[${index}][file]`, resource.file)
-  //         formData.append(`resources[${index}][type]`, 'file')
-  //         formData.append(
-  //           `resources[${index}][name]`,
-  //           resource.name || resource.file.name
-  //         )
-
-  //         uploadedFiles++
-  //         setProgress({
-  //           percentage: Math.round((uploadedFiles / totalFiles) * 100),
-  //           message: `Uploading resource ${uploadedFiles} of ${totalFiles}...`,
-  //         })
-  //       } else if (resource.type === 'link') {
-  //         formData.append(`resources[${index}][type]`, 'link')
-  //         formData.append(`resources[${index}][url]`, resource.url)
-  //         formData.append(
-  //           `resources[${index}][name]`,
-  //           resource.name || resource.url
-  //         )
-  //       }
-  //     })
 
   const handleUpdate = async () => {
     if (!form.title.trim()) return toast.error('Title is required')
@@ -179,7 +125,7 @@ export default function EditLecturePage() {
       setProgress({ percentage: 95, message: 'Finalizing lecture update...' })
 
       await axios.put(
-        `http://localhost:5000/api/instructor/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
+        `${baseURL}/instructor/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
         formData,
         {
           headers: {

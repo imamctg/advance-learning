@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const SingleCoursePage = () => {
   const { courseId } = useParams()
   const router = useRouter()
@@ -14,7 +15,7 @@ const SingleCoursePage = () => {
   useEffect(() => {
     if (courseId) {
       axios
-        .get(`http://localhost:5000/api/courses/${courseId}`)
+        .get(`${baseURL}/courses/${courseId}`)
         .then((res) => {
           setCourse(res.data.data)
           setLoading(false)

@@ -5,6 +5,8 @@ import User from '../user/user.model'
 import { uploadToCloudinary } from '../../utils/cloudinaryUpload'
 import fs from 'fs'
 import { verifyCaptcha } from '../../utils/verifyCaptcha'
+import * as crypto from 'crypto'
+import nodemailer from 'nodemailer'
 
 export const handleRegister = async (
   req: Request,
@@ -164,5 +166,95 @@ export const handleGetProfile = async (
     })
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong', error })
+  }
+}
+
+// FORGOT PASSWORD
+export const handleForgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { email } = req.body
+  try {
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found with this email' })
+      return
+    }
+
+    const token = crypto.randomBytes(32).toString('hex')
+    const expireTime = Date.now() + 1000 * 60 * 60 // 1 hour
+
+    user.resetPasswordToken = token
+    user.resetPasswordExpires = new Date(expireTime)
+
+    await user.save()
+
+    const resetLink = `${process.env.CLIENT_URL}/auth/reset-password/${token}`
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // অথবা আপনার SMTP Provider
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    })
+
+    const mailOptions = {
+      from: `"Advanced Learning" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <p>You requested to reset your password.</p>
+        <p>Click the link below to reset it:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link will expire in 1 hour.</p>
+      `,
+    }
+
+    await transporter.sendMail(mailOptions)
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset email sent',
+    })
+  } catch (err: any) {
+    console.error('❌ Forgot password error:', err)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+// RESET PASSWORD
+export const handleResetPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { token } = req.params
+  const { password } = req.body
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() },
+    })
+
+    if (!user) {
+      res.status(400).json({ message: 'Invalid or expired token' })
+      return
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+    user.password = hashedPassword
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpires = undefined
+
+    await user.save()
+
+    res
+      .status(200)
+      .json({ success: true, message: 'Password updated successfully' })
+  } catch (err: any) {
+    console.error('❌ Reset password error:', err)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 }

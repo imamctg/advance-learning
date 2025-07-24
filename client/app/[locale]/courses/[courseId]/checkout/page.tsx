@@ -157,6 +157,7 @@ import axios from 'axios'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const CheckoutPage = () => {
   const params = useParams()
   const router = useRouter()
@@ -178,7 +179,7 @@ const CheckoutPage = () => {
   useEffect(() => {
     if (courseId) {
       axios
-        .get(`http://localhost:5000/api/courses/${courseId}`)
+        .get(`${baseURL}/courses/${courseId}`)
         .then((res) => {
           setCourse(res.data.data)
           setLoading(false)
@@ -200,23 +201,20 @@ const CheckoutPage = () => {
     try {
       const tran_id = `tran_${Date.now()}`
 
-      const orderResponse = await axios.post(
-        'http://localhost:5000/api/orders',
-        {
-          userId: user.id,
-          courseId: course._id,
-          amount: course.price,
-          status: 'pending',
-          transactionId: tran_id,
-          paymentType: paymentType,
-        }
-      )
+      const orderResponse = await axios.post(`${baseURL}/orders`, {
+        userId: user.id,
+        courseId: course._id,
+        amount: course.price,
+        status: 'pending',
+        transactionId: tran_id,
+        paymentType: paymentType,
+      })
 
       const order = orderResponse.data
 
       if (paymentType === 'sslcommerz') {
         const response = await axios.post(
-          'http://localhost:5000/api/payment/initiate-payment',
+          `${baseURL}/payment/initiate-payment`,
           {
             amount: course.price,
             courseTitle: course.title,
@@ -234,18 +232,15 @@ const CheckoutPage = () => {
           setError('Could not get payment URL.')
         }
       } else if (paymentType === 'bkash') {
-        const response = await axios.post(
-          'http://localhost:5000/api/payment/initiate-bkash',
-          {
-            amount: course.price,
-            courseTitle: course.title,
-            userEmail: user.email,
-            userId: user.id,
-            courseId: course._id,
-            orderId: order._id,
-            transactionId: tran_id,
-          }
-        )
+        const response = await axios.post(`${baseURL}/payment/initiate-bkash`, {
+          amount: course.price,
+          courseTitle: course.title,
+          userEmail: user.email,
+          userId: user.id,
+          courseId: course._id,
+          orderId: order._id,
+          transactionId: tran_id,
+        })
 
         if (response.data?.bkashURL) {
           window.location.href = response.data.bkashURL

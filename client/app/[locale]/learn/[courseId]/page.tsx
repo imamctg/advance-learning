@@ -20,6 +20,7 @@ interface Course {
   sections: Section[]
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function CourseDetailsPage() {
   const token = useSelector((state: RootState) => state.auth.token)
   const { courseId } = useParams()
@@ -46,10 +47,10 @@ export default function CourseDetailsPage() {
         if (!token || !courseId) return
 
         const [courseRes, quizzesRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/courses/${courseId}/details`, {
+          axios.get(`${baseURL}/courses/${courseId}/details`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:5000/api/quizzes/course/${courseId}`, {
+          axios.get(`${baseURL}/quizzes/course/${courseId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ])
@@ -179,7 +180,7 @@ export default function CourseDetailsPage() {
     }
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/courses/lectures/${lectureId}/complete`,
+        `${baseURL}/courses/lectures/${lectureId}/complete`,
         { courseId },
         {
           headers: {

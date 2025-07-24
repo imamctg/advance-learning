@@ -13,6 +13,7 @@ const categories = [
   { key: 'data', icon: '📊' },
 ]
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function Homepage() {
   const t = useTranslations('home')
   const [courses, setCourses] = useState([])
@@ -20,7 +21,7 @@ export default function Homepage() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/courses?status=published')
+      .get(`${baseURL}/courses?status=published`)
       .then((res) => {
         setCourses(res.data.data)
       })
@@ -29,7 +30,7 @@ export default function Homepage() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/reviews/homepage-reviews')
+      .get(`${baseURL}/reviews/homepage-reviews`)
       .then((res) => setTestimonials(res.data))
       .catch((err) => console.error('Failed to fetch testimonials:', err))
   }, [])
@@ -133,7 +134,7 @@ export default function Homepage() {
         <h2 className='text-3xl font-bold text-center mb-10' data-aos='fade-up'>
           {t('testimonials.title')}
         </h2>
-        <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className='max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
           {testimonials.map((tItem, i) => (
             <div
               key={i}
@@ -160,6 +161,14 @@ export default function Homepage() {
             </div>
           ))}
         </div>
+        {/* <div className='text-center mt-10'>
+          <Link
+            href='/testimonials'
+            className='inline-block bg-indigo-600 text-white px-6 py-3 rounded-md font-semibold shadow hover:bg-indigo-700 transition'
+          >
+            🔎 সব রিভিউ দেখুন
+          </Link>
+        </div> */}
       </section>
 
       {/* CTA */}

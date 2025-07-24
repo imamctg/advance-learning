@@ -6,22 +6,9 @@ import { useSelector } from 'react-redux'
 import Link from 'next/link'
 import { RootState } from 'features/redux/store'
 import ReviewModal from 'components/common/ReviewModal'
+import { CourseWithProgress } from 'types/courseProgress'
 
-interface CourseWithProgress {
-  _id: string
-  title: string
-  thumbnail: string
-  instructor:
-    | {
-        _id: string
-        name: string
-      }
-    | string
-  progress: number
-  totalLectures: number
-  completedLectures: number
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const MyCourses = () => {
   const [courses, setCourses] = useState<CourseWithProgress[]>([])
   const user = useSelector((state: RootState) => state.auth.user)
@@ -36,23 +23,16 @@ const MyCourses = () => {
       if (!userId || !token) return
 
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-        const response = await axios.get(
-          `${baseUrl}/api/user/courses/progress`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
+        const response = await axios.get(`${baseURL}/user/courses/progress`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         setCourses(response.data.courses)
       } catch (error) {
         console.error('❌ Error fetching user courses with progress:', error)
         // fallback
         try {
-          const baseUrl =
-            process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
           const fallbackResponse = await axios.get(
-            `${baseUrl}/api/user/${userId}/courses`,
+            `${baseURL}/user/${userId}/courses`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }

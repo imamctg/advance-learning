@@ -1,4 +1,3 @@
-// File: app/dashboard/user/payment-method/page.tsx
 import PaymentMethodSection from 'components/Dashboard/PaymentMethodSection'
 import { Metadata } from 'next'
 

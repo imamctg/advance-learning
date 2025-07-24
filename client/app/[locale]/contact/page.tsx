@@ -9,6 +9,7 @@ import ReCAPTCHA from 'react-google-recaptcha'
 import axios from 'axios'
 import { useTranslations } from 'next-intl'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const ContactPage = () => {
   const t = useTranslations('contact') // ✅ Translation hook
 
@@ -52,7 +53,7 @@ const ContactPage = () => {
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/contact',
+        `${baseURL}/contact`,
         {
           name: form.name,
           email: form.email,

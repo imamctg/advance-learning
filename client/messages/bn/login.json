@@ -7,5 +7,6 @@
   "emailPlaceholder": "ইমেইল",
   "passwordPlaceholder": "পাসওয়ার্ড",
   "success": "লগইন সফল হয়েছে!",
-  "error": "লগইন ব্যর্থ হয়েছে!"
+  "error": "লগইন ব্যর্থ হয়েছে!",
+  "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?"
 }

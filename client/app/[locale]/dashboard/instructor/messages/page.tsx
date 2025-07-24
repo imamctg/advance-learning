@@ -7,6 +7,7 @@ import ChatWindow from 'components/messages/ChatWindow'
 import UserList from 'components/messages/UserList'
 import { RootState } from 'features/redux/store'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function MessagesPage() {
   const user = useSelector((state: RootState) => state.auth.user)
   const token = useSelector((state: RootState) => state.auth.token)
@@ -19,7 +20,7 @@ export default function MessagesPage() {
     const fetchUsers = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/messages/available-users/${user.id}`,
+          `${baseURL}/messages/available-users/${user.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

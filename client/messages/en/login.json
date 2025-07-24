@@ -7,5 +7,6 @@
   "emailPlaceholder": "Email",
   "passwordPlaceholder": "Password",
   "success": "Login successful!",
-  "error": "Login failed!"
+  "error": "Login failed!",
+  "forgotPassword": "Forgot password?"
 }

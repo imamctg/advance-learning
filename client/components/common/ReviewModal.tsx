@@ -12,7 +12,7 @@ interface Props {
   onClose: () => void
   courseId: string
 }
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const ReviewModal = ({ isOpen, onClose, courseId }: Props) => {
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
@@ -23,10 +23,9 @@ const ReviewModal = ({ isOpen, onClose, courseId }: Props) => {
     if (!rating || !comment) return
     try {
       setLoading(true)
-      const baseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+
       await axios.post(
-        `${baseUrl}/api/reviews/submit`,
+        `${baseURL}/reviews/submit`,
         {
           courseId,
           rating,

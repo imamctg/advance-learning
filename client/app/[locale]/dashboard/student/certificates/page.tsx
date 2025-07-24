@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 import CertificateDownloadButton from 'components/certificates/CertificateDownloadButton'
-import { R } from 'framer-motion/dist/types.d-D0HXPxHm'
 import { RootState } from 'features/redux/store'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function CertificatePage() {
   const user = useSelector((state: any) => state.auth.user)
   const token = useSelector((state: RootState) => state.auth.token)
@@ -15,14 +15,11 @@ export default function CertificatePage() {
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/users/${user?.id}/courses`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
+        const res = await axios.get(`${baseURL}/users/${user?.id}/courses`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         setCourses(res.data.courses || [])
       } catch (error) {
         console.error('Error fetching courses for certificates:', error)

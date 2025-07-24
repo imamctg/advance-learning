@@ -12,6 +12,7 @@ interface Course {
   thumbnail: string
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const CurriculumCourseListPage = () => {
   const user = useSelector((state: RootState) => state.auth.user)
   const token = useSelector((state: RootState) => state.auth.token)
@@ -20,11 +21,9 @@ const CurriculumCourseListPage = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get(
-          // `http://localhost:5000/api/instructor/${user.id}/courses`,
-          `http://localhost:5000/api/courses/${user.id}/courses`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
+        const res = await axios.get(`${baseURL}/courses/${user.id}/courses`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         setCourses(res.data.courses || [])
       } catch (err) {
         console.error('Failed to load courses')

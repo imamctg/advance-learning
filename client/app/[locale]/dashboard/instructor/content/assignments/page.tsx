@@ -12,6 +12,7 @@ interface Course {
   thumbnail: string
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const AssignmentCourseListPage = () => {
   const user = useSelector((state: RootState) => state.auth.user)
   const token = useSelector((state: RootState) => state.auth.token)
@@ -21,7 +22,7 @@ const AssignmentCourseListPage = () => {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/${user.id}/courses`,
+          `${baseURL}/instructor/${user.id}/courses`,
           { headers: { Authorization: `Bearer ${token}` } }
         )
         setCourses(res.data.courses || [])

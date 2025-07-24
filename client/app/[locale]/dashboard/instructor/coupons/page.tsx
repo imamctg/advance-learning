@@ -4,14 +4,9 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
+import { Coupon } from 'types/coupon'
 
-interface Coupon {
-  _id: string
-  code: string
-  discount: number
-  expiresAt: string
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [code, setCode] = useState('')
@@ -22,7 +17,7 @@ export default function CouponsPage() {
   // Fetch coupons from backend
   const fetchCoupons = async () => {
     try {
-      const res = await axios.get('/api/instructor/coupons')
+      const res = await axios.get(`${baseURL}/instructor/coupons`)
       setCoupons(res.data)
     } catch (err) {
       toast.error('Failed to fetch coupons')
@@ -39,7 +34,11 @@ export default function CouponsPage() {
       return toast.error('All fields required')
     }
     try {
-      await axios.post('/api/instructor/coupons', { code, discount, expiresAt })
+      await axios.post(`${baseURL}/instructor/coupons`, {
+        code,
+        discount,
+        expiresAt,
+      })
       toast.success('Coupon created')
       setCode('')
       setDiscount(0)
@@ -53,7 +52,7 @@ export default function CouponsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this coupon?')) return
     try {
-      await axios.delete(`/api/instructor/coupons/${id}`)
+      await axios.delete(`${baseURL}/instructor/coupons/${id}`)
       toast.success('Coupon deleted')
       fetchCoupons()
     } catch (err) {

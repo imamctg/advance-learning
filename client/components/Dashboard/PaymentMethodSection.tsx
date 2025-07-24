@@ -3,17 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
+import { Order } from 'types/purchase-history'
 
-interface Order {
-  _id: string
-  courseId: string
-  paymentType: string
-  amount: number
-  status: string
-  transactionId: string
-  createdAt: string
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function PaymentMethodSection() {
   const user = useSelector((state: any) => state.auth.user)
   const [orders, setOrders] = useState<Order[]>([])
@@ -22,9 +14,7 @@ export default function PaymentMethodSection() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/orders/${user.id}`
-        )
+        const res = await axios.get(`${baseURL}/orders/${user.id}`)
         setOrders(res.data)
         setLoading(false)
       } catch (err) {

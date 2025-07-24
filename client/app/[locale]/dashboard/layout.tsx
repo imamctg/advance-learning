@@ -1,4 +1,3 @@
-// app/dashboard/layout.tsx
 'use client'
 
 import DashboardSidebar from 'components/Dashboard/DashboardSidebar'

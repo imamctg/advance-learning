@@ -15,18 +15,11 @@ import {
   TableRow,
 } from 'components/ui/table'
 import { Pagination } from 'components/shared/Pagination'
-import { u } from 'framer-motion/dist/types.d-CtuPurYT'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
+import { ContactMessage } from 'types/contactMessage'
 
-interface ContactMessage {
-  _id: string
-  name: string
-  email: string
-  message: string
-  createdAt: string
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const AdminContactMessagesPage = () => {
   const token = useSelector((state: RootState) => state.auth.token)
   const [messages, setMessages] = useState<ContactMessage[]>([])
@@ -39,7 +32,7 @@ const AdminContactMessagesPage = () => {
   const fetchMessages = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`http://localhost:5000/api/contact`, {
+      const res = await axios.get(`${baseURL}/contact`, {
         params: { search, page, limit },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -57,7 +50,7 @@ const AdminContactMessagesPage = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this message?')) return
     try {
-      await axios.delete(`http://localhost:5000/api/contact/${id}`, {
+      await axios.delete(`${baseURL}/contact/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

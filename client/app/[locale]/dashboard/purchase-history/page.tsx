@@ -2,21 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { Order } from 'types/purchase-history'
 
-interface Course {
-  _id: string
-  title: string
-}
-
-interface Order {
-  _id: string
-  courseId: Course
-  amount: number
-  paymentType: string
-  createdAt: string
-  receiptUrl?: string
-}
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const PurchaseHistoryPage = () => {
   const [orders, setOrders] = useState<Order[]>([])
 
@@ -26,9 +14,7 @@ const PurchaseHistoryPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/orders/${userId}`
-        )
+        const res = await axios.get(`${baseURL}/orders/${userId}`)
         setOrders(res.data)
       } catch (err) {
         console.error('Failed to fetch orders', err)

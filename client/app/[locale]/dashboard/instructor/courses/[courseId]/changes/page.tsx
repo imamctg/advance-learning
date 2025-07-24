@@ -1,4 +1,3 @@
-// app/dashboard/instructor/courses/[courseId]/changes/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'

@@ -1,7 +1,4 @@
-// import { Badge } from '@/components/ui/badge';
-
 import { Badge } from 'components/ui/badge'
-
 interface Props {
   course: {
     _id: string

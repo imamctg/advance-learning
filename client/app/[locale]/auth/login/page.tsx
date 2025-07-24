@@ -1,5 +1,3 @@
-// Updated login page with next-intl support
-// app/auth/login/page.tsx
 'use client'
 import React, { Suspense } from 'react'
 import LoginForm from 'components/auth/LoginForm'
@@ -20,6 +18,15 @@ const LoginPage = () => {
       </Suspense>
 
       <LoginForm />
+
+      <p className='text-center mt-2'>
+        <Link
+          href='/auth/forgot-password'
+          className='text-sm text-blue-600 hover:underline'
+        >
+          {t('forgotPassword')}
+        </Link>
+      </p>
 
       <p className='text-center mt-4'>
         {t('noAccount')}{' '}

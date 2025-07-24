@@ -10,7 +10,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import User from 'types/user'
 
 const pageSize = 10
-
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const UsersPage = () => {
   const token = useSelector((state: RootState) => state.auth.token)
   const [users, setUsers] = useState<User[]>([])
@@ -22,7 +22,8 @@ const UsersPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users', {
+      if (!token) return
+      const response = await axios.get(`${baseURL}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,12 +36,12 @@ const UsersPage = () => {
 
   useEffect(() => {
     fetchUsers()
-  }, [])
+  }, [token])
 
   const handleChangeRole = async (userId: string, newRole: User['role']) => {
     try {
       await axios.patch(
-        `http://localhost:5000/api/users/${userId}/role`,
+        `${baseURL}/users/${userId}/role`,
         {
           role: newRole,
         },
@@ -66,7 +67,7 @@ const UsersPage = () => {
   ) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/admin/instructor/${userId}/status`,
+        `${baseURL}/users/admin/instructor/${userId}/status`,
         { status: newStatus },
         {
           headers: {
@@ -91,7 +92,11 @@ const UsersPage = () => {
     if (!confirm) return
     try {
       setLoading(true)
-      await axios.delete(`http://localhost:5000/api/users/${userId}`)
+      await axios.delete(`${baseURL}/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       setUsers((prev) => prev.filter((user) => user._id !== userId))
       toast.success('User deleted')
     } catch (error) {

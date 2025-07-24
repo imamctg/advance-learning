@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
 
 export default function AddLectureQuizPage() {
-  // const { courseId, sectionId, lectureId } = useParams()
   const { courseId, sectionId, lectureId } = useParams() as {
     courseId: string
     sectionId: string
