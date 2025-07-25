@@ -11,6 +11,7 @@ import { Label } from 'components/ui/label'
 import { useSelector } from 'react-redux'
 import { RootState } from 'features/redux/store'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function EditLecturePage() {
   const token = useSelector((state: RootState) => state.auth.token)
   const { courseId, sectionId, lectureId } = useParams()
@@ -29,7 +30,7 @@ export default function EditLecturePage() {
     const fetchLecture = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/instructor/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
+          `${baseURL}/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -70,7 +71,7 @@ export default function EditLecturePage() {
     setSaving(true)
     try {
       await axios.put(
-        `http://localhost:5000/api/instructor/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
+        `${baseURL}/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
         formData,
         {
           headers: {

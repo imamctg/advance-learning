@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useParams } from 'next/navigation'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const CourseDetails = () => {
   const { id } = useParams()
   const [course, setCourse] = useState<any>(null)
@@ -12,7 +13,7 @@ const CourseDetails = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/courses/${id}`)
+        const res = await axios.get(`${baseURL}/courses/${id}`)
         setCourse(res.data)
       } catch (err) {
         console.error(err)

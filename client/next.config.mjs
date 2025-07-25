@@ -2,6 +2,7 @@
 
 import createNextIntlPlugin from 'next-intl/plugin'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 
 const nextConfig = {
@@ -12,7 +13,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:5000/api/:path*',
+        destination: `${baseURL}/:path*`,
       },
     ]
   },

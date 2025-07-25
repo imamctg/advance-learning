@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export const addLectureToSection = createAsyncThunk(
   'course/addLectureToSection',
   async (
@@ -26,7 +27,7 @@ export const addLectureToSection = createAsyncThunk(
       formData.append('isFreePreview', String(isFreePreview))
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/courses/${courseId}/sections/${sectionId}/lectures`,
+        `${baseURL}/courses/${courseId}/sections/${sectionId}/lectures`,
         formData,
         {
           headers: {

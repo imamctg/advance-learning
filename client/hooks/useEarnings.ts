@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { EarningsData } from 'types/earnings'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export function useEarnings() {
   const token = useSelector((state: RootState) => state.auth.token)
   const [data, setData] = useState<EarningsData | null>(null)
@@ -19,14 +20,11 @@ export function useEarnings() {
 
     const fetchEarnings = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:5000/api/earnings/instructor',
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
+        const res = await axios.get(`${baseURL}/earnings/instructor`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         setData(res.data)
         setError(null)
       } catch (err: any) {

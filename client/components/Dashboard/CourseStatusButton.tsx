@@ -6,7 +6,7 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 
-// components/CourseStatusButton.tsx
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const CourseStatusButton = ({ course, onUpdate }) => {
   const token = useSelector((state: RootState) => state.auth.token)
   const [loading, setLoading] = useState(false)
@@ -14,10 +14,9 @@ const CourseStatusButton = ({ course, onUpdate }) => {
   const handleAction = async (action: string) => {
     setLoading(true)
     try {
-      await axios.post(
-        `http://localhost:5000/api/courses/${course._id}/${action}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      await axios.post(`${baseURL}/courses/${course._id}/${action}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       onUpdate() // Refresh course data
     } catch (error) {
       toast.error(error.message)

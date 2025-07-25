@@ -12,6 +12,7 @@ interface CourseStatusState {
   } | null
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const initialState: CourseStatusState = {
   loading: false,
   error: null,
@@ -22,7 +23,7 @@ export const submitForReview = createAsyncThunk(
   'courseStatus/submitForReview',
   async (courseId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`/courses/${courseId}/submit`)
+      const response = await axios.post(`${baseURL}/courses/${courseId}/submit`)
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response.data.message)
@@ -45,10 +46,13 @@ export const reviewCourse = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`/courses/${courseId}/review`, {
-        decision,
-        notes,
-      })
+      const response = await axios.post(
+        `${baseURL}/courses/${courseId}/review`,
+        {
+          decision,
+          notes,
+        }
+      )
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response.data.message)

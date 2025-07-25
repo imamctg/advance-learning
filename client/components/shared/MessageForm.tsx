@@ -8,6 +8,7 @@ interface MessageFormProps {
   senderId: string
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function MessageForm({ senderId }: MessageFormProps) {
   const [users, setUsers] = useState([])
   const [receiverId, setReceiverId] = useState('')
@@ -16,7 +17,7 @@ export default function MessageForm({ senderId }: MessageFormProps) {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await axios.get('http://localhost:5000/api/users')
+      const res = await axios.get(`${baseURL}/users`)
       setUsers(res.data.users)
     }
     fetchUsers()
@@ -25,7 +26,7 @@ export default function MessageForm({ senderId }: MessageFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await axios.post('http://localhost:5000/api/message/send', {
+      await axios.post(`${baseURL}/message/send`, {
         senderId,
         receiverId,
         text,

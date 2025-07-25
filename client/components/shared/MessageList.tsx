@@ -21,6 +21,7 @@ interface Props {
   type: 'inbox' | 'sent'
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 export default function MessageList({
   title,
   messages,
@@ -37,7 +38,7 @@ export default function MessageList({
       try {
         await Promise.all(
           unreadMessages.map((msg) =>
-            fetch(`http://localhost:5000/api/message/read/${msg._id}`, {
+            fetch(`${baseURL}/message/read/${msg._id}`, {
               method: 'PUT',
             })
           )

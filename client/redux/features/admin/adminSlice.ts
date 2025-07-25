@@ -17,11 +17,12 @@ const initialState = {
   loading: false,
   error: null,
 }
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export const fetchAdminDashboard = createAsyncThunk(
   'admin/fetchDashboard',
   async () => {
-    const res = await axios.get('/api/admin/dashboard')
+    const res = await axios.get(`${baseURL}/admin/dashboard`)
     return res.data
   }
 )

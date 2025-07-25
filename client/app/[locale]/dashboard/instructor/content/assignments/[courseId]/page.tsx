@@ -68,12 +68,9 @@ const AssignmentPage = ({
 
   const deleteAssignment = async (assignmentId: string) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/instructor/assignments/${assignmentId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      await axios.delete(`${baseURL}/assignments/${assignmentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       toast.success('Assignment deleted')
       window.location.reload()
     } catch {

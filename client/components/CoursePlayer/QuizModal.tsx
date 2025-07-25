@@ -22,6 +22,7 @@ interface QuizSubmission {
   quizType: 'lecture' | 'section' | null
 }
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 const QuizModal: React.FC<Props> = ({ quiz, quizType, onClose, onSubmit }) => {
   const token = useSelector((state: RootState) => state.auth.token)
   const [answers, setAnswers] = useState<number[]>([])
@@ -90,61 +91,6 @@ const QuizModal: React.FC<Props> = ({ quiz, quizType, onClose, onSubmit }) => {
     setIsSubmitting(true)
   }
 
-  // const handleQuizSubmit = async (score: number, total: number) => {
-  //   setIsSubmitting(true)
-  //   setError(null)
-
-  //   try {
-  //     const formattedAnswers = quiz.questions.map((question, index) => ({
-  //       questionIndex: index,
-  //       selectedOption: answers[index],
-  //       isCorrect: answers[index] === question.correctAnswer,
-  //       timeSpent: 30, // Or calculate actual time per question
-  //     }))
-
-  //     const timeSpent = 600 - timeLeft // Total time spent in seconds
-
-  //     const submissionData = {
-  //       score,
-  //       total,
-  //       answers: formattedAnswers,
-  //       timeSpent,
-  //       quizType,
-  //       courseId: quiz.course,
-  //     }
-
-  //     const response = await axios.post(
-  //       `http://localhost:5000/api/quizzes/submit/${quiz._id}`,
-  //       submissionData,
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     )
-
-  //     if (response.data.success) {
-  //       setSubmitted(true)
-  //       await onSubmit(score, total, formattedAnswers)
-  //     } else {
-  //       throw new Error(response.data.message || 'Submission failed')
-  //     }
-  //   } catch (err: any) {
-  //     console.error('Quiz submission error:', err)
-
-  //     // Check if the error is from server response or network
-  //     const errorMessage =
-  //       err.response?.data?.message ||
-  //       err.message ||
-  //       'Failed to submit quiz. Please try again.'
-
-  //     setError(errorMessage)
-
-  //     // Even if there's an error, show success UI if data was saved
-  //     if (err.response?.data?.success) {
-  //       setSubmitted(true)
-  //     }
-  //   } finally {
-  //     setIsSubmitting(false)
-  //   }
-  // }
-
   const handleQuizSubmit = async (score: number, total: number) => {
     setIsSubmitting(true)
     setError(null)
@@ -169,7 +115,7 @@ const QuizModal: React.FC<Props> = ({ quiz, quizType, onClose, onSubmit }) => {
       }
 
       const response = await axios.post(
-        `http://localhost:5000/api/quizzes/submit/${quiz._id}`,
+        `${baseURL}/quizzes/submit/${quiz._id}`,
         submissionData,
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -205,13 +151,6 @@ const QuizModal: React.FC<Props> = ({ quiz, quizType, onClose, onSubmit }) => {
             {quiz.title} -{' '}
             {quizType === 'lecture' ? 'Lecture Quiz' : 'Section Quiz'}
           </h2>
-          {/* <button
-            onClick={onClose}
-            className='text-gray-500 hover:text-gray-700'
-            disabled={isSubmitting}
-          >
-            ✕
-          </button> */}
 
           <button
             onClick={() => {
@@ -362,14 +301,7 @@ const QuizModal: React.FC<Props> = ({ quiz, quizType, onClose, onSubmit }) => {
               })}
             </div>
 
-            <div className='flex justify-end mt-6'>
-              {/* <button
-                onClick={onClose}
-                className='px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700'
-              >
-                Close
-              </button> */}
-            </div>
+            <div className='flex justify-end mt-6'></div>
           </div>
         )}
       </div>
