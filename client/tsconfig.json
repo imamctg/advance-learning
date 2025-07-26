@@ -32,7 +32,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    "next-intl.config.js"
+    "next-intl.config.ts"
   ],
   "exclude": ["node_modules"]
 }
