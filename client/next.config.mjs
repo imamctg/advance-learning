@@ -2,7 +2,9 @@
 
 import createNextIntlPlugin from 'next-intl/plugin'
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+const baseURL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'https://advance-learning.onrender.com/api'
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 
 const nextConfig = {
