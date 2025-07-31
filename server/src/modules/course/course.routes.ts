@@ -42,7 +42,7 @@ router.post(
 )
 
 router.get('/', getAllCourses)
-router.get('/:id', getSingleCourse)
+router.get('/:slug', getSingleCourse)
 router.put(
   '/:courseId',
   authMiddleware,
@@ -67,7 +67,7 @@ router.get(
 )
 
 // 🔹 Nested Course Details
-router.get('/:courseId/details', authMiddleware, getCourseById)
+router.get('/:slug/details', authMiddleware, getCourseById)
 
 // 🔹 Section Management
 router.post(
@@ -78,7 +78,7 @@ router.post(
 )
 
 router.put(
-  '/courses/:courseId/sections/:sectionId',
+  '/:courseId/sections/:sectionId',
   authMiddleware,
   requireRole(['admin', 'instructor']),
   upload.fields([{ name: 'resourceFile', maxCount: 1 }]),
@@ -106,14 +106,14 @@ router.post(
 )
 
 router.get(
-  '/courses/:courseId/sections/:sectionId/lectures/:lectureId',
+  '/:courseId/sections/:sectionId/lectures/:lectureId',
   authMiddleware,
   requireRole(['admin', 'instructor']),
   getLectureById
 )
 
 router.put(
-  '/courses/:courseId/sections/:sectionId/lectures/:lectureId',
+  '/:courseId/sections/:sectionId/lectures/:lectureId',
   authMiddleware,
   requireRole(['admin', 'instructor']),
   upload.fields([

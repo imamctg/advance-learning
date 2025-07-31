@@ -20,6 +20,7 @@ interface CourseProgress {
 interface EnrolledCourseLean {
   _id: Types.ObjectId
   title: string
+  slug: string
   thumbnail: string
   instructor: {
     _id: Types.ObjectId
@@ -38,7 +39,7 @@ export const getCourseProgressService = async (
   // ✅ 1. Get enrolled courses with instructor populated
   const enrolledCourses = await Course.find(
     { students: userId },
-    '_id title thumbnail instructor sections'
+    '_id title thumbnail instructor sections slug'
   )
     .populate<{ instructor: { _id: Types.ObjectId; name: string } }>(
       'instructor',
@@ -82,6 +83,7 @@ export const getCourseProgressService = async (
       return {
         _id: course._id,
         title: course.title,
+        slug: course.slug,
         thumbnail: course.thumbnail,
         instructor: {
           _id: course.instructor._id.toString(),

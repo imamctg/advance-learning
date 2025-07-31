@@ -85,6 +85,7 @@ export interface ICourse extends Document {
   description: string
   price: number
   instructor: Types.ObjectId | string
+  slug: string
   thumbnail: string
   introVideo: string
   sections: Types.DocumentArray<ISection>
@@ -166,6 +167,8 @@ const courseSchema = new Schema<ICourse>(
       ref: 'User',
       required: true,
     },
+    slug: { type: String, unique: true, required: true },
+
     thumbnail: { type: String, required: true },
     introVideo: { type: String, required: true },
     sections: [sectionSchema],

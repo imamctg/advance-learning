@@ -42,17 +42,6 @@ export const createCourse = async (req: Request, res: Response) => {
   }
 }
 
-// export const getAllCourses = async (req: Request, res: Response) => {
-//   try {
-//     const courses = await Course.find()
-//     res.status(200).json({ success: true, data: courses })
-//   } catch (error) {
-//     res
-//       .status(500)
-//       .json({ success: false, message: 'Failed to fetch courses', error })
-//   }
-// }
-
 export const getAllCourses = async (req: Request, res: Response) => {
   try {
     const { status } = req.query // কুয়েরি প্যারামিটার থেকে status নেওয়া
@@ -79,7 +68,8 @@ export const getSingleCourse = async (
   res: Response
 ): Promise<any> => {
   try {
-    const course = await Course.findById(req.params.id)
+    const { slug } = req.params
+    const course = await Course.findOne({ slug })
     if (!course)
       return res.status(404).json({ success: false, message: 'Not found' })
     res.status(200).json({ success: true, data: course })
@@ -122,181 +112,6 @@ export const deleteCourse = async (
   }
 }
 
-// export const getCourseById = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   const course = await Course.findById(req.params.courseId)
-//   if (!course) return res.status(404).json({ message: 'Not found' })
-//   res.json(course)
-// }
-
-// export const getInstructorStudents = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     console.log(req.user, 'controller .....')
-//     if (!req.user?._id) {
-//       return res.status(401).json({ success: false, message: 'Unauthorized' })
-//     }
-
-//     // const instructorId = new mongoose.Types.ObjectId(req.user._id.toString())
-//     const instructorId = mongoose.Types.ObjectId.createFromHexString(
-//       req.user._id.toString()
-//     )
-//     const students = await courseService.getStudentsByInstructor(instructorId)
-
-//     res.status(200).json({
-//       success: true,
-//       data: students,
-//     })
-//   } catch (error) {
-//     console.error('Error in getInstructorStudents:', error)
-//     res.status(500).json({
-//       success: false,
-//       message:
-//         error instanceof Error ? error.message : 'Failed to fetch students',
-//       error: process.env.NODE_ENV === 'development' ? error : undefined,
-//     })
-//   }
-// }
-// export const getCourseById = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const course = await Course.findById(req.params.courseId)
-//       .populate('instructor', 'name email')
-//       .populate('sections.lectures.resources')
-
-//     if (!course) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Course not found',
-//       })
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       data: course,
-//     })
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to fetch course details',
-//     })
-//   }
-// }
-
-// import { Request, Response } from 'express'
-// import Course from './course.model'
-// import UserProgress from './UserProgress.model'
-
-// export const getCourseById = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const userId = req.user?._id || null
-
-//     const course = await Course.findById(req.params.courseId)
-//       .populate('instructor', 'name email')
-//       .populate('sections.lectures.resources')
-//       .lean()
-
-//     if (!course) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Course not found',
-//       })
-//     }
-
-//     // ✅ If user is authenticated, inject completed flags
-//     if (userId) {
-//       const completedLectures = await UserProgressModel.find({
-//         user: userId,
-//         completed: true,
-//       }).lean()
-
-//       const completedLectureIds = completedLectures.map((cl) =>
-//         cl.lecture.toString()
-//       )
-
-//       course.sections.forEach((section: any) => {
-//         section.lectures.forEach((lecture: any) => {
-//           lecture.completed = completedLectureIds.includes(
-//             lecture._id.toString()
-//           )
-//         })
-//       })
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       data: course,
-//     })
-//   } catch (error) {
-//     console.error('❌ Error fetching course:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to fetch course details',
-//     })
-//   }
-// }
-
-// export const getCourseById = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const userId = req.user?._id || null
-
-//     const course = (await Course.findById(req.params.courseId)
-//       .populate('instructor', 'name email')
-//       .populate('sections.lectures.resources')
-//       .lean()) as unknown as ICourse
-
-//     if (!course) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Course not found',
-//       })
-//     }
-
-//     if (userId) {
-//       const completedLectures = await UserProgressModel.find({
-//         user: userId,
-//         completed: true,
-//         course: req.params.courseId,
-//       }).lean()
-
-//       const completedLectureIds = completedLectures.map((cl) =>
-//         cl.lecture.toString()
-//       )
-
-//       course.sections.forEach((section) => {
-//         section.lectures.forEach((lecture) => {
-//           lecture['completed'] = completedLectureIds.includes(
-//             lecture._id.toString()
-//           )
-//         })
-//       })
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       data: course,
-//     })
-//   } catch (error) {
-//     console.error('❌ Error fetching course:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to fetch course details',
-//     })
-//   }
-// }
-
 export const getCourseById = async (
   req: Request,
   res: Response
@@ -304,7 +119,9 @@ export const getCourseById = async (
   try {
     const userId = req.user?._id || null
     console.log(userId, 'userIdggggggggggggggggggg')
-    const course = (await Course.findById(req.params.courseId)
+    console.log(req.params.slug, 'req.params.slug')
+    const course = (await Course.findOne({ slug: req.params.courseId })
+
       .populate('instructor', 'name email')
       .populate('sections.lectures.resources')
       .lean()) as unknown as ICourse
@@ -316,12 +133,12 @@ export const getCourseById = async (
       })
     }
     console.log(userId, 'userIdkljh')
-    console.log(req.params.courseId, 'courseIdjjjj')
+    console.log(req.params.course, 'courseIdjjjj')
     if (userId) {
       const completedLectures = await UserProgressModel.find({
         user: userId,
         completed: true,
-        course: req.params.courseId,
+        course: course._id,
       }).lean()
 
       const completedLectureIds = completedLectures.map((cl) =>
@@ -362,8 +179,9 @@ export const getInstructorCourses = async (
         .json({ success: false, message: 'Invalid instructor ID' })
     }
     const courses = await Course.find({ instructor: instructorId })
-      .populate('students', '_id') // ✅ শুধু ID বা name/email দিতে পারো
+      .select('_id title students thumbnail slug status') // ✅ এখানেই slug select করা হচ্ছে
       .sort({ createdAt: -1 })
+
     console.log(courses, 'courses')
     res.status(200).json({ success: true, courses })
   } catch (error) {
@@ -387,238 +205,6 @@ export const addSectionToCourse = async (
   await course.save()
   res.status(201).json(course)
 }
-
-// export const addLectureToSection = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const { courseId, sectionId } = req.params
-//     const { title, description, isFreePreview } = req.body
-
-//     // Debug log to see what files are being received
-//     console.log('Received files:', req.files)
-//     console.log('Received body:', req.body)
-
-//     // Check if files exist and contain the video
-//     if (!req.files || !('video' in req.files)) {
-//       return res.status(400).json({ message: 'Video file is required' })
-//     }
-
-//     const files = req.files as { [fieldname: string]: Express.Multer.File[] }
-//     const videoFile = files['video'][0]
-
-//     // Upload video to Cloudinary
-//     const videoUpload = await uploadToCloudinary(
-//       videoFile.buffer,
-//       'lectureVideos',
-//       `lecture_${Date.now()}`,
-//       'video'
-//     )
-
-//     const duration = await getCloudinaryVideoDuration(videoUpload.public_id)
-
-//     // Process resources - simplified approach
-//     const resources: any[] = []
-
-//     // Handle file resources
-//     for (const [key, value] of Object.entries(files)) {
-//       if (key.startsWith('resources') && key.includes('[file]')) {
-//         const indexMatch = key.match(/resources\[(\d+)\]\[file\]/)
-//         if (indexMatch) {
-//           const index = indexMatch[1]
-//           const file = value[0]
-//           const resourceType = req.body[`resources[${index}][type]`] || 'file'
-//           const resourceName =
-//             req.body[`resources[${index}][name]`] || file.originalname
-
-//           if (resourceType === 'file') {
-//             const upload = await uploadToCloudinary(
-//               file.buffer,
-//               'lectureResources',
-//               `resource_${index}_${Date.now()}`,
-//               'raw'
-//             )
-//             resources.push({
-//               type: 'file',
-//               name: resourceName,
-//               url: upload.secure_url,
-//               mimeType: file.mimetype,
-//             })
-//           }
-//         }
-//       }
-//     }
-
-//     // Handle link resources
-//     for (const key in req.body) {
-//       if (key.startsWith('resources') && key.includes('[url]')) {
-//         const indexMatch = key.match(/resources\[(\d+)\]\[url\]/)
-//         if (indexMatch) {
-//           const index = indexMatch[1]
-//           const resourceType = req.body[`resources[${index}][type]`] || 'link'
-//           if (resourceType === 'link') {
-//             const resourceName =
-//               req.body[`resources[${index}][name]`] || req.body[key]
-//             resources.push({
-//               type: 'link',
-//               name: resourceName,
-//               url: req.body[key],
-//             })
-//           }
-//         }
-//       }
-//     }
-
-//     const course = await Course.findById(courseId)
-//     if (!course) return res.status(404).json({ message: 'Course not found' })
-
-//     const section = course.sections.id(sectionId)
-//     if (!section) return res.status(404).json({ message: 'Section not found' })
-
-//     section.lectures.push({
-//       title,
-//       description: description || '',
-//       videoUrl: videoUpload.secure_url,
-//       duration,
-//       isFreePreview: isFreePreview === 'true',
-//       resources,
-//     })
-
-//     await course.save()
-//     return res.status(201).json({
-//       success: true,
-//       message: 'Lecture added successfully',
-//       data: {
-//         lecture: section.lectures[section.lectures.length - 1],
-//         sectionId: section._id,
-//       },
-//     })
-//   } catch (error) {
-//     console.error('Error adding lecture:', error)
-//     return res.status(500).json({
-//       success: false,
-//       message: 'Internal server error',
-//       error: error instanceof Error ? error.message : 'Unknown error',
-//     })
-//   }
-// }
-
-// export const addLectureToSection = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const { courseId, sectionId } = req.params
-//     const {
-//       title,
-//       description,
-//       isFreePreview,
-//       resources: resourcesBody,
-//     } = req.body
-
-//     console.log('Received files:', req.files)
-//     console.log('Received body:', req.body)
-
-//     if (!req.files || !('video' in req.files)) {
-//       return res.status(400).json({ message: 'Video file is required' })
-//     }
-
-//     const files = req.files as { [fieldname: string]: Express.Multer.File[] }
-//     const videoFile = files['video'][0]
-
-//     const videoUpload = await uploadToCloudinary(
-//       videoFile.buffer,
-//       'lectureVideos',
-//       `lecture_${Date.now()}`,
-//       'video'
-//     )
-
-//     const duration = await getCloudinaryVideoDuration(videoUpload.public_id)
-
-//     // Process resources - handle both files and links
-//     const resources: any[] = []
-
-//     // Handle file resources from multipart form
-//     for (const [key, value] of Object.entries(files)) {
-//       if (key.startsWith('resources') && key.includes('[file]')) {
-//         const indexMatch = key.match(/resources\[(\d+)\]\[file\]/)
-//         if (indexMatch) {
-//           const index = indexMatch[1]
-//           const file = value[0]
-//           const resourceType = req.body[`resources[${index}][type]`] || 'file'
-//           const resourceName =
-//             req.body[`resources[${index}][name]`] || file.originalname
-
-//           if (resourceType === 'file') {
-//             const upload = await uploadToCloudinary(
-//               file.buffer,
-//               'lectureResources',
-//               `resource_${index}_${Date.now()}`,
-//               'raw'
-//             )
-//             resources.push({
-//               type: 'file',
-//               name: resourceName,
-//               url: upload.secure_url,
-//               mimeType: file.mimetype,
-//             })
-//           }
-//         }
-//       }
-//     }
-
-//     // Handle link resources from JSON body
-//     if (typeof resourcesBody === 'string') {
-//       try {
-//         const parsedResources = JSON.parse(resourcesBody)
-//         parsedResources.forEach((resource: any) => {
-//           if (resource.type === 'link') {
-//             resources.push({
-//               type: 'link',
-//               name: resource.name || resource.url,
-//               url: resource.url,
-//             })
-//           }
-//         })
-//       } catch (e) {
-//         console.error('Error parsing resources body:', e)
-//       }
-//     }
-
-//     const course = await Course.findById(courseId)
-//     if (!course) return res.status(404).json({ message: 'Course not found' })
-
-//     const section = course.sections.id(sectionId)
-//     if (!section) return res.status(404).json({ message: 'Section not found' })
-
-//     section.lectures.push({
-//       title,
-//       description: description || '',
-//       videoUrl: videoUpload.secure_url,
-//       duration,
-//       isFreePreview: isFreePreview === 'true',
-//       resources,
-//     })
-
-//     await course.save()
-//     return res.status(201).json({
-//       success: true,
-//       message: 'Lecture added successfully',
-//       data: {
-//         lecture: section.lectures[section.lectures.length - 1],
-//         sectionId: section._id,
-//       },
-//     })
-//   } catch (error) {
-//     console.error('Error adding lecture:', error)
-//     return res.status(500).json({
-//       success: false,
-//       message: 'Internal server error',
-//       error: error instanceof Error ? error.message : 'Unknown error',
-//     })
-//   }
-// }
 
 export const addLectureToSection = async (
   req: Request,
@@ -843,42 +429,6 @@ export const getLectureById = async (
   }
 }
 
-// export const updateLectureById = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   const { courseId, sectionId, lectureId } = req.params
-//   const { title, description } = req.body
-
-//   const files = req.files as
-//     | { [fieldname: string]: Express.Multer.File[] }
-//     | undefined
-//   const videoFile = files?.['video']?.[0]
-//   const resourceFiles = files?.['resource']
-
-//   try {
-//     const updatedLecture = await courseService.updateLectureById({
-//       courseId,
-//       sectionId,
-//       lectureId,
-//       title,
-//       description,
-//       videoFile,
-//       resourceFiles,
-//     })
-
-//     if (!updatedLecture)
-//       return res
-//         .status(404)
-//         .json({ message: 'Lecture not found or update failed' })
-
-//     res.json({ message: 'Lecture updated successfully', data: updatedLecture })
-//   } catch (error) {
-//     console.error('Error updating lecture:', error)
-//     res.status(500).json({ message: 'Server error', error })
-//   }
-// }
-
 interface UpdateLectureParams {
   courseId: string
   sectionId: string
@@ -1032,44 +582,6 @@ export const updateSectionByIdController = async (
   res.status(200).json({ section: updatedSection })
 }
 
-// ✅ Updated Controller Function
-// export const markLectureAsCompleted = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const { courseId } = req.body
-//     const { lectureId } = req.params
-//     const userId = req.user._id
-
-//     if (!courseId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Course ID is required',
-//       })
-//     }
-
-//     // ✅ courseId যুক্ত করে পাঠাও
-//     const updatedProgress = await courseService.markLectureCompleted(
-//       lectureId,
-//       userId,
-//       courseId // ✅ added
-//     )
-
-//     res.json({
-//       success: true,
-//       message: 'Lecture marked as completed',
-//       data: updatedProgress,
-//     })
-//   } catch (error: any) {
-//     console.error('Error marking lecture as completed:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: error.message || 'Failed to mark lecture as completed',
-//     })
-//   }
-// }
-
 export const markLectureAsCompleted = async (
   req: Request,
   res: Response
@@ -1123,51 +635,6 @@ export const markLectureAsCompleted = async (
   }
 }
 
-// ====================== NEW STATUS MANAGEMENT CONTROLLERS ======================
-
-// In your lecture controller
-// export const markLectureAsCompleted = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const { lectureId } = req.params
-//     const userId = req.user.userId
-
-//     // Check if already marked complete
-//     const existingProgress = await UserProgressModel.findOne({
-//       user: userId,
-//       lecture: lectureId,
-//     })
-
-//     if (existingProgress) {
-//       return res.status(StatusCodes.OK).json({
-//         success: true,
-//         message: 'Lecture already marked as completed',
-//       })
-//     }
-
-//     // Create new progress record
-//     await UserProgressModel.create({
-//       user: userId,
-//       lecture: lectureId,
-//       completed: true,
-//       completedAt: new Date(),
-//     })
-
-//     res.status(StatusCodes.OK).json({
-//       success: true,
-//       message: 'Lecture marked as completed',
-//     })
-//   } catch (error) {
-//     console.error('Error marking lecture complete:', error)
-//     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//       success: false,
-//       message: 'Error marking lecture as completed',
-//     })
-//   }
-// }
-
 /**
  * @desc    Submit course for admin review
  * @route   POST /api/courses/:courseId/submit
@@ -1198,91 +665,6 @@ export const submitCourseForReview = async (req: Request, res: Response) => {
  * @route   POST /api/courses/:courseId/review
  * @access  Admin
  */
-// export const reviewCourse = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const { decision, notes } = req.body
-
-//     const validDecisions = ['approved', 'rejected', 'changes_requested']
-//     if (!validDecisions.includes(decision)) {
-//       return res.status(400).json({
-//         success: false,
-//         message:
-//           'Invalid decision. Must be one of: approved, rejected, changes_requested',
-//       })
-//     }
-// // Update course status
-//     const course = await courseService.reviewCourseByAdmin(
-//       req.params.courseId,
-//       req.user._id, // Admin ID
-//       decision as 'approved' | 'rejected' | 'changes_requested',
-//       notes
-//     )
-
-//     res.status(200).json({
-//       success: true,
-//       message: `Course ${decision}`,
-//       data: course,
-//     })
-//   } catch (error: any) {
-//     res.status(400).json({
-//       success: false,
-//       message: error.message || 'Failed to review course',
-//     })
-//   }
-// }
-
-// export const reviewCourse = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const { decision, notes } = req.body
-//     const { courseId } = req.params
-//     const adminId = req.user._id // From auth middleware
-
-//     // Validate decision
-//     const validDecisions = ['approved', 'rejected', 'changes_requested']
-//     if (!validDecisions.includes(decision)) {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Invalid decision value',
-//       })
-//     }
-
-//     // Update course status
-//     const course = await Course.findByIdAndUpdate(
-//       courseId,
-//       {
-//         status: decision,
-//         adminNotes: notes,
-//         reviewedBy: adminId,
-//         reviewedAt: new Date(),
-//       },
-//       { new: true }
-//     )
-
-//     if (!course) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Course not found',
-//       })
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       message: `Course ${decision}`,
-//       data: course,
-//     })
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to review course',
-//     })
-//   }
-// }
 
 export const reviewCourse = async (
   req: Request,
@@ -1496,118 +878,6 @@ export const getAdminNotes = async (
     res.status(500).json({ message: 'Failed to fetch notes' })
   }
 }
-// course.controller.ts
-// export const resubmitCourse = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     const { courseId } = req.params
-//     const { responseNote } = req.body
-//     const instructorId = req.user._id
-
-//     const course = await Course.findOneAndUpdate(
-//       {
-//         _id: courseId,
-//         instructor: instructorId,
-//         status: 'changes_requested',
-//       },
-//       {
-//         $set: {
-//           status: 'under_review',
-//           lastReviewedAt: new Date(),
-//         },
-//         $push: {
-//           adminNotes: {
-//             adminId: instructorId, // Instructor is responding
-//             note: 'Instructor response to changes',
-//             responseNote: responseNote,
-//             createdAt: new Date(),
-//             updatedAt: new Date(),
-//           },
-//         },
-//       },
-//       { new: true }
-//     )
-
-//     if (!course) {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Course not found or not in changes_requested state',
-//       })
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       message: 'Course resubmitted for review',
-//       data: {
-//         status: course.status,
-//         adminNotes: course.adminNotes,
-//       },
-//     })
-//   } catch (error: any) {
-//     console.error('Error resubmitting course:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to resubmit course',
-//       error: error.message,
-//     })
-//   }
-// }
-
-// export const resubmitCourse = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     console.log('Resubmitting course...')
-//     const { courseId } = req.params
-//     const { responseNote } = req.body
-//     const instructorId = req.user._id
-
-//     // Find the course
-//     const course = await Course.findOne({
-//       _id: courseId,
-//       instructor: instructorId,
-//       status: 'changes_requested',
-//     })
-
-//     if (!course) {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Course not found or not in changes_requested state',
-//       })
-//     }
-
-//     // Add response to the latest admin note or change request
-//     if (course.adminNotes.length > 0) {
-//       const lastNote = course.adminNotes[course.adminNotes.length - 1]
-//       lastNote.responseNote = responseNote
-//       lastNote.updatedAt = new Date()
-//     } else if (course.changeRequests.length > 0) {
-//       const lastRequest =
-//         course.changeRequests[course.changeRequests.length - 1]
-//       lastRequest.responseNote = responseNote
-//       lastRequest.updatedAt = new Date()
-//     }
-
-//     // Update course status
-//     course.status = 'under_review'
-//     await course.save()
-
-//     res.status(200).json({
-//       success: true,
-//       message: 'Course resubmitted for review',
-//       data: course,
-//     })
-//   } catch (error) {
-//     console.error('Error resubmitting course:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to resubmit course',
-//     })
-//   }
-// }
 
 export const resubmitCourse = async (
   req: Request,
@@ -1682,108 +952,6 @@ export const resubmitCourse = async (
     })
   }
 }
-
-// export const getMyCourseStudents = async (req: Request, res: Response) => {
-//   try {
-//     const instructorId = req.user.id
-//     console.log('Instructor ID:', instructorId)
-//     const students = await courseService.getStudentsOfInstructorCourses(
-//       instructorId
-//     )
-//     res.status(200).json({ students })
-//   } catch (error) {
-//     console.error('Error fetching students:', error)
-//     res.status(500).json({ message: 'Server error while fetching students.' })
-//   }
-// }
-
-// export const getMyCourseStudents = async (req: Request, res: Response) => {
-//   try {
-//     const instructorId = req.user._id // req.user.id নয়, req.user._id ব্যবহার করুন
-//     console.log('Instructor ID:', instructorId)
-
-//     const students = await courseService.getStudentsOfInstructorCourses(
-//       instructorId.toString() // ObjectId কে স্ট্রিং-এ কনভার্ট করুন
-//     )
-
-//     res.status(200).json({
-//       success: true,
-//       students,
-//     })
-//   } catch (error) {
-//     console.error('Error fetching students:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error while fetching students.',
-//     })
-//   }
-// }
-
-// export const getMyCourseStudents = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     // প্রথমে নিশ্চিত করুন req.user সঠিকভাবে পপুলেটেড হয়েছে
-//     if (!req.user || !req.user._id) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'Unauthorized: User not authenticated',
-//       })
-//     }
-//     const instructorId = req.user._id || req.user.id // উভয় ক্ষেত্রে কাজ করবে
-//     console.log('Instructor ID:', instructorId)
-
-//     const students = await courseService.getStudentsOfInstructorCourses(
-//       instructorId.toString()
-//     )
-
-//     res.status(200).json({
-//       success: true,
-//       students,
-//     })
-//   } catch (error: any) {
-//     console.error('Error fetching students:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error while fetching students.',
-//       error: error.message, // ডিবাগিং এর জন্য এরর মেসেজ যোগ করুন
-//     })
-//   }
-// }
-
-// export const getMyCourseStudents = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     if (!req.user || !req.user._id) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'User not authenticated',
-//       })
-//     }
-
-//     console.log('Authenticated User:', req.user) // ডিবাগিং লগ
-
-//     const instructorId = req.user._id // mongoose ObjectId
-//     const students = await courseService.getStudentsOfInstructorCourses(
-//       instructorId.toString()
-//     )
-
-//     res.status(200).json({
-//       success: true,
-//       students,
-//     })
-//   } catch (error) {
-//     console.error('Error in getMyCourseStudents:', error)
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error',
-//       error: error instanceof Error ? error.message : 'Unknown error',
-//     })
-//   }
-// }
 
 export const getMyCourseStudents = async (
   req: Request,

@@ -6,6 +6,8 @@ import Course, { ILecture, COURSE_STATUSES, CourseStatus } from './course.model'
 import LectureModel from './Lecture.model'
 import UserProgressModel from './UserProgress.model'
 import User, { IUser } from '../user/user.model'
+import slugify from 'slugify'
+import { nanoid } from 'nanoid'
 
 export const handleCourseCreation = async (
   body: any,
@@ -134,6 +136,8 @@ export const handleCourseCreation = async (
       }
     })
   )
+  const baseSlug = slugify(title, { lower: true, strict: true })
+  const slug = `${baseSlug}-${nanoid(6)}`
 
   // Create and save the course
   const course = new Course({
@@ -144,6 +148,7 @@ export const handleCourseCreation = async (
     thumbnail: thumbnailUpload.secure_url,
     introVideo: introVideoUpload.secure_url,
     sections,
+    slug,
     status: 'draft', // Default status
   })
 
@@ -303,48 +308,6 @@ export const submitCourseForReview = async (
   return course
 }
 
-// export const reviewCourseByAdmin = async (
-//   courseId: string,
-//   adminId: string,
-//   decision: 'approved' | 'rejected' | 'changes_requested',
-//   notes?: string
-// ) => {
-//   const course = await Course.findById(courseId)
-//   if (!course) throw new Error('Course not found')
-
-//   if (!canChangeStatus(course.status, decision, 'admin')) {
-//     throw new Error(
-//       `Invalid status transition from ${course.status} to ${decision}`
-//     )
-//   }
-
-//   course.status = decision
-//   course.lastReviewedAt = new Date()
-//   course.lastReviewedBy = adminId
-
-//   if (decision === 'rejected' || decision === 'changes_requested') {
-//     course.adminNote = notes
-//   }
-
-//   await course.save()
-//   return course
-// }
-
-// export const publishCourse = async (courseId: string, instructorId: string) => {
-//   const course = await Course.findOne({
-//     _id: courseId,
-//     instructor: instructorId,
-//     status: 'approved',
-//   })
-
-//   if (!course) throw new Error('Course not approved or not found')
-
-//   course.status = 'published'
-//   course.publishedAt = new Date()
-//   await course.save()
-//   return course
-// }
-
 export const publishCourse = async (courseId: string, instructorId: string) => {
   // First get the course to clean adminNotes
   const course = await Course.findOne({
@@ -418,100 +381,6 @@ interface StudentWithCourses
     enrolledAt: Date
   }[]
 }
-
-// export const getStudentsByInstructor = async (
-//   instructorId: mongoose.Types.ObjectId
-// ): Promise<StudentWithCourses[]> => {
-//   try {
-//     // Find all courses by this instructor
-//     const courses = await Course.find(
-//       { instructor: instructorId },
-//       { _id: 1, title: 1, students: 1, studentsEnrolledAt: 1 }
-//     ).lean()
-
-//     if (!courses || courses.length === 0) {
-//       return []
-//     }
-
-//     // Extract all unique student IDs with proper typing
-//     const studentIds = courses.flatMap((course) =>
-//       course.students.map((student: mongoose.Types.ObjectId) =>
-//         student.toString()
-//       )
-//     )
-//     const uniqueStudentIds = [...new Set(studentIds)]
-
-//     // Get basic student info
-//     const students = await User.find(
-//       {
-//         _id: {
-//           $in: uniqueStudentIds.map((id) => new mongoose.Types.ObjectId(id)),
-//         },
-//       },
-//       { _id: 1, name: 1, email: 1, profileImage: 1, joinedAt: 1 }
-//     ).lean()
-
-//     // Map courses to students with proper typing
-//     return students.map((student: any) => {
-//       const enrolledCourses = courses
-//         .filter((course) =>
-//           course.students.some((id: mongoose.Types.ObjectId) =>
-//             id.equals(student._id)
-//           )
-//         )
-//         .map((course: any) => {
-//           const studentIndex = course.students.findIndex(
-//             (id: mongoose.Types.ObjectId) => id.equals(student._id)
-//           )
-//           return {
-//             _id: new mongoose.Types.ObjectId(course._id.toString()),
-//             title: course.title,
-//             enrolledAt: course.studentsEnrolledAt?.[studentIndex] || new Date(),
-//           }
-//         })
-
-//       return {
-//         ...student,
-//         // _id: new mongoose.Types.ObjectId(student._id.toString()),
-//         _id: mongoose.Types.ObjectId.createFromHexString(
-//           student._id.toString()
-//         ),
-
-//         enrolledCourses,
-//       } as StudentWithCourses
-//     })
-//   } catch (error) {
-//     console.error('Error in getStudentsByInstructor:', error)
-//     throw error
-//   }
-// }
-
-// export const getStudentsOfInstructorCourses = async (instructorId: string) => {
-//   try {
-//     const courses = await Course.find({ instructor: instructorId }).select(
-//       'students'
-//     )
-//     if (!courses.length) {
-//       throw new Error('No courses found for this instructor')
-//     }
-
-//     const studentIds = new Set<string>()
-//     courses.forEach((course) => {
-//       course.students.forEach((studentId: any) => {
-//         studentIds.add(studentId.toString())
-//       })
-//     })
-
-//     const students = await User.find({
-//       _id: { $in: Array.from(studentIds) },
-//     }).select('name email profileImage role')
-
-//     return students
-//   } catch (error) {
-//     console.error('Error in getStudentsOfInstructorCourses:', error)
-//     throw error
-//   }
-// }
 
 export const getStudentsOfInstructorCourses = async (instructorId: string) => {
   try {

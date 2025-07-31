@@ -12,6 +12,7 @@ import quizRoutes from './modules/quiz/quiz.routes'
 import progressRoutes from './modules/progress/progress.routes'
 import contactRoutes from './modules/contact/contact.routes'
 import reviewRoutes from './modules/review/reviews.routes'
+import couponRoutes from './modules/coupon/coupon.routes'
 
 import dotenv from 'dotenv'
 import { EarningsRoutes } from './modules/earnings/earnings.routes'
@@ -56,6 +57,7 @@ app.use('/api/orders', orderRoutes)
 app.use('/api/payment', paymentRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/certificate', certificateRoutes)
+app.use('/api/coupon', couponRoutes)
 
 // 🏠 Default Route
 app.get('/', (req, res) => {
