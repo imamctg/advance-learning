@@ -10,7 +10,7 @@ export interface IOrder extends Document {
   status: 'pending' | 'paid' | 'failed'
   transactionId: string
   receiptUrl?: string
-
+  referrerId?: Types.ObjectId
   createdAt: Date
 }
 
@@ -27,6 +27,7 @@ const orderSchema = new Schema<IOrder>(
     },
     transactionId: { type: String, required: true }, // 👈 এই ফিল্ড
     receiptUrl: { type: String },
+    referrerId: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 )

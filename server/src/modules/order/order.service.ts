@@ -12,6 +12,7 @@ export const OrderService = {
     paymentType: string
     receiptUrl?: string
     transactionId?: string
+    referrerId?: string
   }) {
     const newOrder = new Order({
       userId: orderData.userId,
@@ -21,6 +22,7 @@ export const OrderService = {
       transactionId: orderData.transactionId,
       status: 'pending', // প্রথমে pending স্ট্যাটাসে রাখুন
       receiptUrl: orderData.receiptUrl,
+      referrerId: orderData.referrerId,
     })
 
     const savedOrder = await newOrder.save()

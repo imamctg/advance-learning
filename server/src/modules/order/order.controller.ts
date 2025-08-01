@@ -6,8 +6,15 @@ import { OrderService } from './order.service'
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { userId, courseId, amount, paymentType, receiptUrl, transactionId } =
-      req.body
+    const {
+      userId,
+      courseId,
+      amount,
+      paymentType,
+      receiptUrl,
+      transactionId,
+      referrerId,
+    } = req.body
     console.log('createOrder:', req.body)
 
     const savedOrder = await OrderService.createNewOrder({
@@ -17,6 +24,7 @@ export const createOrder = async (req: Request, res: Response) => {
       paymentType,
       receiptUrl,
       transactionId,
+      referrerId,
     })
 
     res.status(201).json(savedOrder)

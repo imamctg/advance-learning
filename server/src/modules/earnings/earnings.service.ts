@@ -21,10 +21,16 @@ export class EarningsService {
     const instructor = await User.findById(course.instructor)
     if (!instructor) throw new Error('Instructor not found')
 
-    // Determine student source (simplified logic)
-    const studentSource = order.transactionId.includes('AFF')
-      ? 'affiliate'
-      : 'platform' // Add your actual logic here
+    // ✅ Determine student source from referrer
+    let studentSource: 'affiliate' | 'instructor' | 'platform' = 'platform'
+    if (order.referrerId) {
+      const refUser = await User.findById(order.referrerId)
+      if (refUser?.role === 'affiliate') {
+        studentSource = 'affiliate'
+      } else if (refUser?.role === 'instructor') {
+        studentSource = 'instructor'
+      }
+    }
 
     // Calculate earnings based on your revenue model
     // const { grossAmount, platformFee, instructorEarnings, affiliateFee } =

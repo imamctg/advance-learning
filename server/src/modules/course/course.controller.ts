@@ -44,17 +44,21 @@ export const createCourse = async (req: Request, res: Response) => {
 
 export const getAllCourses = async (req: Request, res: Response) => {
   try {
-    const { status } = req.query // কুয়েরি প্যারামিটার থেকে status নেওয়া
-    console.log(status)
-    // ফিল্টার অবজেক্ট তৈরি
+    const { status, instructor } = req.query // ✅ instructor প্যারামিটার নিচ্ছেন
     const filter: any = {}
+
     if (status) {
       filter.status = status
     }
-    console.log(filter, 'filter')
+
+    if (instructor) {
+      filter.instructor = instructor // ✅ instructorId দিয়ে ফিল্টার
+    }
+
     const courses = await Course.find(filter)
-      .populate('instructor', 'name') // ✅ শুধু নাম আনো
+      .populate('instructor', 'name') // ✅ instructor name দেখানোর জন্য populate
       .sort({ createdAt: -1 })
+
     res.status(200).json({ success: true, data: courses })
   } catch (error) {
     res

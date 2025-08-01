@@ -4,6 +4,7 @@ export const USER_ROLES = [
   'student',
   'instructor',
   'moderator',
+  'affiliate',
   'developer',
   'admin',
 ] as const
@@ -29,6 +30,8 @@ export interface IUser extends Document {
     certificateUrl: string
     issuedAt: Date
   }[]
+  referrerId?: Types.ObjectId
+
   resetPasswordToken?: string
   resetPasswordExpires?: Date
 
@@ -87,6 +90,11 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
         },
       },
     ],
+    referrerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
   },

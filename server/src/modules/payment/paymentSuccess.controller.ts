@@ -5,6 +5,8 @@ import User from '../user/user.model'
 import { Request, Response } from 'express'
 import { OrderService } from '../order/order.service'
 import { Types } from 'mongoose'
+import { ReferralTracking } from '../referral/referral-tracking.model'
+import { ReferralService } from '../referral/referral.service'
 
 export const paymentSuccess = async (
   req: Request,
@@ -37,6 +39,17 @@ export const paymentSuccess = async (
       },
       { new: true }
     )
+
+    // ✅ 2.5: Track referral if referrerId exists
+    const order = await Order.findById(orderId)
+    if (order?.referrerId) {
+      await ReferralService.trackPurchase({
+        referrerId: order.referrerId,
+        userId: new Types.ObjectId(userId as string),
+        courseId: new Types.ObjectId(courseId as string),
+        transactionId: tran_id as string,
+      })
+    }
 
     // 3. Add course to user's purchasedCourses
     await User.findByIdAndUpdate(
