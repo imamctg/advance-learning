@@ -13,6 +13,7 @@ import progressRoutes from './modules/progress/progress.routes'
 import contactRoutes from './modules/contact/contact.routes'
 import reviewRoutes from './modules/review/reviews.routes'
 import couponRoutes from './modules/coupon/coupon.routes'
+import affiliateRoutes from './modules/affiliate/affiliate.routes'
 
 import dotenv from 'dotenv'
 import { EarningsRoutes } from './modules/earnings/earnings.routes'
@@ -20,6 +21,7 @@ import helmet from 'helmet'
 
 import { globalErrorHandler } from './middlewares/errorHandler'
 import { sanitizeInput } from './middlewares/sanitize.middleware'
+import { scheduleBonuses } from './schedulers/monthlyBonusJob'
 
 dotenv.config()
 const app = express()
@@ -56,6 +58,7 @@ app.use('/api/user', progressRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/payment', paymentRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/affiliate', affiliateRoutes)
 app.use('/api/certificate', certificateRoutes)
 app.use('/api/coupon', couponRoutes)
 
@@ -64,6 +67,7 @@ app.get('/', (req, res) => {
   res.send('API is running...! Hello vai')
 })
 
+scheduleBonuses()
 // 🧯 Global Error Handler
 app.use(globalErrorHandler)
 

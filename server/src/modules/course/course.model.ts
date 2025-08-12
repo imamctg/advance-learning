@@ -103,6 +103,8 @@ export interface ICourse extends Document {
   changeRequests: Types.DocumentArray<IChangeRequest>
   changeLog?: string // Track instructor's changes
   // notes: ICourseNote[]
+  affiliateDiscount?: number
+  instructorDiscount?: number
 }
 
 // ---------- SCHEMAS ----------
@@ -192,6 +194,18 @@ const courseSchema = new Schema<ICourse>(
     changeRequests: [changeRequestSchema],
     changeLog: { type: String },
     // notes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CourseNote' }],
+    affiliateDiscount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 1, // ১ মানে ১০০%
+    },
+    instructorDiscount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 1,
+    },
   },
 
   { timestamps: true }

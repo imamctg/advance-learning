@@ -67,15 +67,61 @@ export const getAllCourses = async (req: Request, res: Response) => {
   }
 }
 
+// export const getSingleCourse = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const { slug } = req.params
+//     const course = await Course.findOne({ slug })
+//     if (!course)
+//       return res.status(404).json({ success: false, message: 'Not found' })
+//     res.status(200).json({ success: true, data: course })
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: 'Error', error })
+//   }
+// }
+
+// export const getSingleCourse = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     const { slug } = req.params
+//     // slug যদি 24-অক্ষরের ObjectId হয়, তাহলে সেটা দিয়ে খুঁজবে
+//     const course =
+//       (await Course.findById(slug)) || (await Course.findOne({ slug }))
+//     if (!course)
+//       return res.status(404).json({ success: false, message: 'Not found' })
+//     res.status(200).json(course) // success:true wrapper প্রয়োজন নেই যেহেতু আপনি frontend এ .data.price ব্যবহার করছেন
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: 'Error', error })
+//   }
+// }
+
 export const getSingleCourse = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
     const { slug } = req.params
-    const course = await Course.findOne({ slug })
-    if (!course)
+
+    let course = null
+
+    // যদি এটা valid ObjectId হয়, তাহলে byId দিয়ে খোঁজো
+    if (mongoose.Types.ObjectId.isValid(slug)) {
+      course = await Course.findById(slug)
+    }
+
+    // যদি course এখনও না পাওয়া যায় তাহলে slug দিয়ে খুঁজো
+    if (!course) {
+      course = await Course.findOne({ slug })
+    }
+
+    if (!course) {
       return res.status(404).json({ success: false, message: 'Not found' })
+    }
+
     res.status(200).json({ success: true, data: course })
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error', error })

@@ -10,10 +10,13 @@ export const createOrder = async (req: Request, res: Response) => {
       userId,
       courseId,
       amount,
+      discountAmount,
+      finalPrice,
       paymentType,
       receiptUrl,
       transactionId,
       referrerId,
+      discountPercent,
     } = req.body
     console.log('createOrder:', req.body)
 
@@ -21,10 +24,13 @@ export const createOrder = async (req: Request, res: Response) => {
       userId,
       courseId,
       amount,
+      discountAmount,
+      finalPrice,
       paymentType,
       receiptUrl,
       transactionId,
       referrerId,
+      discountPercent,
     })
 
     res.status(201).json(savedOrder)

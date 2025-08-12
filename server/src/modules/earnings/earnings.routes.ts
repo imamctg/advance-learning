@@ -4,6 +4,7 @@ import { EarningsService } from './earnings.service'
 // import { UserRole } from '../user/user.model'
 import authMiddleware from '../../middlewares/authMiddleware'
 import { requireRole } from '../../middlewares/roleMiddleware'
+import { Earnings } from './earnings.model'
 
 const router = express.Router()
 
@@ -22,6 +23,29 @@ router.get(
           paidEarnings: 0,
         }
       )
+    } catch (error: any) {
+      res.status(500).json({ message: error.message })
+    }
+  }
+)
+
+router.get(
+  '/instructor-bonus',
+  authMiddleware,
+  requireRole(['instructor']),
+  async (req, res) => {
+    try {
+      const earnings = await Earnings.find({ instructorId: req.user._id })
+      const totalWeeklyBonus = earnings.reduce(
+        (sum, e) => sum + (e.weeklyCampaignBonus || 0),
+        0
+      )
+      const monthlyBonusApplied = earnings.some((e) => e.bonusApplied)
+
+      res.json({
+        totalWeeklyBonus,
+        monthlyBonusApplied,
+      })
     } catch (error: any) {
       res.status(500).json({ message: error.message })
     }

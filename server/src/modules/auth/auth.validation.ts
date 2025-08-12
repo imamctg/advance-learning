@@ -23,8 +23,8 @@ export const registerValidation = [
   body('role')
     .notEmpty()
     .withMessage('Role is required')
-    .isIn(['student', 'instructor'])
-    .withMessage('Role must be either student or instructor'),
+    .isIn(['student', 'instructor', 'affiliate'])
+    .withMessage('Role must be either student, instructor, or affiliate'),
 
   // Instructor-specific validation
   body('bio')

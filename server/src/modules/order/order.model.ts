@@ -7,10 +7,16 @@ export interface IOrder extends Document {
   courseId: Types.ObjectId | ICourse
   paymentType: string
   amount: number
+  discountAmount: number
+  finalPrice: number
+
   status: 'pending' | 'paid' | 'failed'
   transactionId: string
   receiptUrl?: string
   referrerId?: Types.ObjectId
+  discountPercent?: number
+  discountType?: 'flat' | 'percentage' // ✅ New
+  discountValue?: number
   createdAt: Date
 }
 
@@ -20,6 +26,8 @@ const orderSchema = new Schema<IOrder>(
     courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
     paymentType: { type: String, required: true },
     amount: { type: Number, required: true },
+    discountAmount: { type: Number, required: true },
+    finalPrice: { type: Number, required: true },
     status: {
       type: String,
       enum: ['pending', 'paid', 'failed'],
@@ -28,6 +36,14 @@ const orderSchema = new Schema<IOrder>(
     transactionId: { type: String, required: true }, // 👈 এই ফিল্ড
     receiptUrl: { type: String },
     referrerId: { type: Schema.Types.ObjectId, ref: 'User' },
+    discountPercent: { type: Number },
+    discountType: {
+      type: String,
+      enum: ['flat', 'percentage'],
+    },
+    discountValue: {
+      type: Number,
+    },
   },
   { timestamps: true }
 )

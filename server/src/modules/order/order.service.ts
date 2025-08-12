@@ -9,20 +9,26 @@ export const OrderService = {
     userId: string
     courseId: string
     amount: number
+    discountAmount: number
+    finalPrice: number
     paymentType: string
     receiptUrl?: string
     transactionId?: string
     referrerId?: string
+    discountPercent?: number
   }) {
     const newOrder = new Order({
       userId: orderData.userId,
       courseId: orderData.courseId,
       amount: orderData.amount,
+      discountAmount: orderData.discountAmount,
+      finalPrice: orderData.finalPrice,
       paymentType: orderData.paymentType,
       transactionId: orderData.transactionId,
       status: 'pending', // প্রথমে pending স্ট্যাটাসে রাখুন
       receiptUrl: orderData.receiptUrl,
       referrerId: orderData.referrerId,
+      discountPercent: orderData.discountPercent,
     })
 
     const savedOrder = await newOrder.save()
