@@ -4,43 +4,156 @@ import mongoose from 'mongoose'
 import AffiliateClickModel from './affiliateClick.model'
 import { Earnings, IEarnings } from '../earnings/earnings.model'
 import AffiliateLinkModel from './affiliateLink.model'
+import {
+  UserType,
+  Withdrawal,
+  WithdrawalMethod,
+  WithdrawalStatus,
+} from '../withdrawals/withdrawal.model'
 
 /**
  * getStats(userId)
  * returns: { totalClicks, conversions, totalEarnings, pendingEarnings }
  */
+// export const getStats = async (userId: string) => {
+//   // aggregate clicks
+//   const totalClicks = await AffiliateClickModel.countDocuments({
+//     affiliateId: userId,
+//   })
+
+//   // conversions = count of earnings documents (or track conversion events separately)
+//   const conversions = await Earnings.countDocuments({
+//     affiliateId: userId,
+//     type: 'conversion',
+//   })
+
+//   // earnings sums
+//   const earningsAgg = await Earnings.aggregate([
+//     { $match: { affiliateId: new mongoose.Types.ObjectId(userId) } },
+//     {
+//       $group: {
+//         _id: null,
+//         total: { $sum: '$affiliateFee' },
+//         pending: {
+//           $sum: {
+//             $cond: [{ $eq: ['$status', 'pending'] }, '$affiliateFee', 0],
+//           },
+//         },
+//       },
+//     },
+//   ])
+
+//   const totalEarnings = earningsAgg[0]?.total || 0
+//   const pendingEarnings = earningsAgg[0]?.pending || 0
+
+//   return { totalClicks, conversions, totalEarnings, pendingEarnings }
+// }
+
+// export const getStats = async (userId: string) => {
+//   // aggregate clicks
+//   const totalClicks = await AffiliateClickModel.countDocuments({
+//     affiliateId: userId,
+//   })
+
+//   // conversions = count of earnings documents
+//   const conversions = await Earnings.countDocuments({
+//     referrerId: userId,
+//     type: 'conversion',
+//   })
+
+//   // earnings sums
+//   const earningsAgg = await Earnings.aggregate([
+//     { $match: { referrerId: new mongoose.Types.ObjectId(userId) } },
+//     {
+//       $group: {
+//         _id: null,
+//         total: { $sum: '$affiliateFee' },
+//         pending: {
+//           $sum: {
+//             $cond: [{ $eq: ['$status', 'pending'] }, '$affiliateFee', 0],
+//           },
+//         },
+//       },
+//     },
+//   ])
+
+//   const totalEarnings = earningsAgg[0]?.total || 0
+//   const pendingEarnings = earningsAgg[0]?.pending || 0
+
+//   return { totalClicks, conversions, totalEarnings, pendingEarnings }
+// }
+
 export const getStats = async (userId: string) => {
-  // aggregate clicks
+  // Total clicks
   const totalClicks = await AffiliateClickModel.countDocuments({
-    affiliateId: userId,
+    referrerId: userId,
   })
 
-  // conversions = count of earnings documents (or track conversion events separately)
+  // Conversions
   const conversions = await Earnings.countDocuments({
-    affiliateId: userId,
+    referrerId: userId,
     type: 'conversion',
   })
 
-  // earnings sums
+  // Earnings aggregation
   const earningsAgg = await Earnings.aggregate([
-    { $match: { affiliateId: new mongoose.Types.ObjectId(userId) } },
+    { $match: { referrerId: new mongoose.Types.ObjectId(userId) } },
     {
       $group: {
         _id: null,
-        total: { $sum: '$affiliateFee' },
-        pending: {
+        totalEarnings: { $sum: '$affiliateFee' },
+        pendingEarnings: {
           $sum: {
             $cond: [{ $eq: ['$status', 'pending'] }, '$affiliateFee', 0],
+          },
+        },
+        totalWithdrawn: {
+          $sum: {
+            $cond: [{ $eq: ['$type', 'withdrawal'] }, '$amount', 0],
           },
         },
       },
     },
   ])
 
-  const totalEarnings = earningsAgg[0]?.total || 0
-  const pendingEarnings = earningsAgg[0]?.pending || 0
+  // Time-based earnings
+  const now = new Date()
+  const todayStart = new Date(now.setHours(0, 0, 0, 0))
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
 
-  return { totalClicks, conversions, totalEarnings, pendingEarnings }
+  const [todayEarnings, monthlyEarnings] = await Promise.all([
+    Earnings.aggregate([
+      {
+        $match: {
+          referrerId: new mongoose.Types.ObjectId(userId),
+          createdAt: { $gte: todayStart },
+        },
+      },
+      { $group: { _id: null, amount: { $sum: '$affiliateFee' } } },
+    ]),
+    Earnings.aggregate([
+      {
+        $match: {
+          referrerId: new mongoose.Types.ObjectId(userId),
+          createdAt: { $gte: monthStart },
+        },
+      },
+      { $group: { _id: null, amount: { $sum: '$affiliateFee' } } },
+    ]),
+  ])
+
+  return {
+    totalClicks,
+    conversions,
+    totalEarnings: earningsAgg[0]?.totalEarnings || 0,
+    pendingEarnings: earningsAgg[0]?.pendingEarnings || 0,
+    totalWithdrawn: earningsAgg[0]?.totalWithdrawn || 0,
+    todayEarnings: todayEarnings[0]?.amount || 0,
+    monthlyEarnings: monthlyEarnings[0]?.amount || 0,
+    availableBalance:
+      (earningsAgg[0]?.totalEarnings || 0) -
+      (earningsAgg[0]?.totalWithdrawn || 0),
+  }
 }
 
 /**
@@ -120,22 +233,40 @@ export const getEarnings = async (userId: string) => {
 /**
  * requestPayout
  */
+// export const requestPayout = async (
+//   userId: string,
+//   payload: { affiliateFee: number; method: string; accountDetails?: any }
+// ) => {
+//   // simplistic: create an earning record with status 'payout_requested'
+//   const { affiliateFee, method, accountDetails } = payload
+//   const payout: Partial<IEarnings> = {
+//     affiliateId: userId as any,
+//     affiliateFee,
+//     type: 'payout',
+//     status: 'requested',
+//     meta: { method, accountDetails, requestStatus: 'requested' },
+//   }
+//   const doc = new Earnings(payout)
+//   await doc.save()
+//   return doc.toObject()
+// }
+
 export const requestPayout = async (
   userId: string,
-  payload: { affiliateFee: number; method: string; details?: any }
+  payload: { amount: number; method: WithdrawalMethod; accountDetails: string }
 ) => {
-  // simplistic: create an earning record with status 'payout_requested'
-  const { affiliateFee, method, details } = payload
-  const payout: Partial<IEarnings> = {
-    affiliateId: userId as any,
-    affiliateFee,
-    type: 'payout',
-    status: 'requested',
-    meta: { method, details, requestStatus: 'requested' },
-  }
-  const doc = new Earnings(payout)
-  await doc.save()
-  return doc.toObject()
+  const { amount, method, accountDetails } = payload
+
+  const withdrawal = await Withdrawal.create({
+    user: userId,
+    userType: UserType.AFFILIATE,
+    amount,
+    method,
+    accountDetails,
+    status: WithdrawalStatus.PENDING,
+  })
+
+  return withdrawal.toObject()
 }
 
 /**

@@ -42,30 +42,30 @@ export const createCourse = async (req: Request, res: Response) => {
   }
 }
 
-export const getAllCourses = async (req: Request, res: Response) => {
-  try {
-    const { status, instructor } = req.query // ✅ instructor প্যারামিটার নিচ্ছেন
-    const filter: any = {}
+// export const getAllCourses = async (req: Request, res: Response) => {
+//   try {
+//     const { status, instructor } = req.query // ✅ instructor প্যারামিটার নিচ্ছেন
+//     const filter: any = {}
 
-    if (status) {
-      filter.status = status
-    }
+//     if (status) {
+//       filter.status = status
+//     }
 
-    if (instructor) {
-      filter.instructor = instructor // ✅ instructorId দিয়ে ফিল্টার
-    }
+//     if (instructor) {
+//       filter.instructor = instructor // ✅ instructorId দিয়ে ফিল্টার
+//     }
 
-    const courses = await Course.find(filter)
-      .populate('instructor', 'name') // ✅ instructor name দেখানোর জন্য populate
-      .sort({ createdAt: -1 })
+//     const courses = await Course.find(filter)
+//       .populate('instructor', 'name') // ✅ instructor name দেখানোর জন্য populate
+//       .sort({ createdAt: -1 })
 
-    res.status(200).json({ success: true, data: courses })
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: 'Failed to fetch courses', error })
-  }
-}
+//     res.status(200).json({ success: true, data: courses })
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ success: false, message: 'Failed to fetch courses', error })
+//   }
+// }
 
 // export const getSingleCourse = async (
 //   req: Request,
@@ -98,6 +98,41 @@ export const getAllCourses = async (req: Request, res: Response) => {
 //     res.status(500).json({ success: false, message: 'Error', error })
 //   }
 // }
+
+export const getAllCourses = async (req: Request, res: Response) => {
+  try {
+    const { status, ref } = req.query
+    const filter: any = {}
+
+    if (status) {
+      filter.status = status
+    }
+
+    let role = null
+    if (ref) {
+      // প্রথমে ref id দিয়ে ইউজার খুঁজে বের করুন
+      const user = await User.findById(ref)
+      if (user) {
+        role = user.role
+
+        if (role === 'instructor') {
+          filter.instructor = ref // শুধু ওই instructor এর কোর্স দেখাবে
+        }
+        // যদি affiliate হয়, তাহলে filter পরিবর্তন করবেন না, মানে সব কোর্স দেখাবে
+      }
+    }
+
+    const courses = await Course.find(filter)
+      .populate('instructor', 'name')
+      .sort({ createdAt: -1 })
+
+    res.status(200).json({ success: true, data: courses, role })
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to fetch courses', error })
+  }
+}
 
 export const getSingleCourse = async (
   req: Request,

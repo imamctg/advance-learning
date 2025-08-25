@@ -3,6 +3,8 @@ import { Response } from 'express'
 import * as AffiliateService from './affiliate.service'
 import { AuthRequest } from '../../middlewares/authMiddleware'
 import { Earnings, IEarnings } from '../earnings/earnings.model'
+import { Withdrawal } from '../withdrawals/withdrawal.model'
+import mongoose from 'mongoose'
 
 export const getAffiliateStats = async (
   req: AuthRequest,
@@ -86,57 +88,100 @@ export const getLinkClicks = async (
 // ): Promise<any> => {
 //   try {
 //     const userId = req.user!._id.toString()
-//     console.log(userId, 'userId')
-//     const earnings = await AffiliateService.getEarnings(userId)
-//     return res.json({ earnings })
+
+//     // const earnings = await AffiliateService.getEarnings(userId)
+//     const withdrawals = await Withdrawal.find({
+//       user: userId,
+//       userType: 'affiliate',
+//     }).lean()
+
+//     const history = [
+//       // ...earnings.map((e) => ({
+//       //   date: e.createdAt,
+//       //   amount: e.affiliateFee ?? 0,
+//       //   type: 'earning',
+//       //   description: `Earning from order ${e.orderId?.toString()}`,
+//       //   status: e.status,
+//       //   method: e.meta?.method ?? 'Affiliate',
+//       // })),
+//       ...withdrawals.map((w) => ({
+//         date: w.createdAt,
+//         amount: w.amount,
+//         type: 'withdraw',
+//         description: `Withdrawal via ${w.method}`,
+//         status: w.status,
+//         method: w.method,
+//       })),
+//     ]
+
+//     return res.json({ history })
 //   } catch (err) {
 //     console.error('getEarnings error', err)
 //     return res.status(500).json({ message: 'Internal server error' })
 //   }
 // }
 
-// backend/controller
 export const getEarnings = async (
   req: AuthRequest,
   res: Response
 ): Promise<any> => {
   try {
     const userId = req.user!._id.toString()
+    const stats = await AffiliateService.getStats(userId)
 
-    // double cast দিয়ে warning বন্ধ করো
-    const earnings = (await AffiliateService.getEarnings(
-      userId
-    )) as unknown as (IEarnings & { createdAt: Date })[]
+    // Generate chart data (last 30 days)
+    const chartData = await Earnings.aggregate([
+      {
+        $match: {
+          referrerId: mongoose.Types.ObjectId.createFromHexString(userId), // Updated approach
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          amount: { $sum: '$affiliateFee' },
+        },
+      },
+      { $sort: { _id: 1 } },
+      {
+        $project: {
+          date: '$_id',
+          amount: 1,
+          _id: 0,
+        },
+      },
+    ])
 
-    const total = earnings.reduce((acc, e) => acc + (e.affiliateFee ?? 0), 0)
-    const today = earnings
-      .filter(
-        (e) =>
-          e.createdAt &&
-          new Date(e.createdAt).toDateString() === new Date().toDateString()
-      )
-      .reduce((acc, e) => acc + (e.affiliateFee ?? 0), 0)
+    const withdrawals = await Withdrawal.find({
+      user: userId,
+      userType: 'affiliate',
+    }).lean()
 
-    const summary = {
-      today,
-      monthly: total,
-      weeklyBonus: 0,
-      monthlyBonus: 0,
-      total,
-    }
+    const history = [
+      ...withdrawals.map((w) => ({
+        date: w.createdAt,
+        amount: w.amount,
+        type: 'withdrawal',
+        description: `Withdrawal via ${w.method}`,
+        status: w.status,
+        method: w.method,
+      })),
+    ]
 
-    const history = earnings.map((e) => ({
-      date: e.createdAt,
-      amount: e.affiliateFee ?? 0,
-      type: 'earning',
-      description: `Earning from order ${e.orderId.toString()}`,
-      status: e.status,
-      method: e.meta?.method ?? 'Affiliate',
-    }))
-
-    const chartData = history
-
-    return res.json({ summary, history, chartData })
+    return res.json({
+      summary: {
+        today: stats.todayEarnings,
+        monthly: stats.monthlyEarnings,
+        weeklyBonus: 0,
+        monthlyBonus: 0,
+        total: stats.totalEarnings,
+        totalWithdrawn: stats.totalWithdrawn,
+        availableBalance: stats.availableBalance,
+      },
+      chartData,
+      history,
+    })
   } catch (err) {
     console.error('getEarnings error', err)
     return res.status(500).json({ message: 'Internal server error' })
@@ -149,15 +194,15 @@ export const requestPayout = async (
 ): Promise<any> => {
   try {
     const userId = req.user!._id.toString()
-    const { amount, method, details } = req.body
-
+    const { amount, method, accountDetails } = req.body
+    console.log(req.body, 'req.body of requestPayout')
     if (!amount || !method)
       return res.status(400).json({ message: 'amount and method required' })
 
     const payout = await AffiliateService.requestPayout(userId, {
-      affiliateFee: amount,
+      amount,
       method,
-      details,
+      accountDetails,
     })
     return res.status(201).json({ payout })
   } catch (err) {

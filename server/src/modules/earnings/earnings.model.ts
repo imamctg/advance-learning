@@ -23,6 +23,7 @@ export interface IEarnings extends Document {
   paymentGatewayFee: number
   status: EarningStatus
   paidAt?: Date
+  withdrawnAmount?: number
   discountType?: DiscountType
   discountAmount?: number
   bonusApplied?: boolean
@@ -32,10 +33,12 @@ export interface IEarnings extends Document {
   type: string
   meta?: {
     method?: string
-    details?: any
+    accountDetails?: any
     requestStatus?: string
     [key: string]: any
   }
+  createdAt: Date
+  updatedAt: Date
 }
 
 const earningsSchema = new Schema<IEarnings>(
@@ -64,12 +67,12 @@ const earningsSchema = new Schema<IEarnings>(
 
     status: {
       type: String,
-      enum: ['pending', 'paid', 'reversed'],
+      enum: ['pending', 'requested', 'paid', 'reversed'],
       default: 'pending',
     },
 
     paidAt: { type: Date },
-
+    withdrawnAmount: { type: Number, default: 0 },
     discountType: {
       type: String,
       enum: ['flat', 'percentage'],

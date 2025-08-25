@@ -24,7 +24,7 @@ router.get('/links/:linkId/clicks', AffiliateController.getLinkClicks)
 router.get('/earnings', AffiliateController.getEarnings)
 
 // POST request payout
-router.post('/payouts/request', AffiliateController.requestPayout)
+router.post('/withdraw/request', AffiliateController.requestPayout)
 
 // GET reports (aggregated) - optional params via query ?from=&to=&groupBy=
 router.get('/reports', AffiliateController.getReports)
