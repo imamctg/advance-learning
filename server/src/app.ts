@@ -23,6 +23,7 @@ import helmet from 'helmet'
 
 import { globalErrorHandler } from './middlewares/errorHandler'
 import { sanitizeInput } from './middlewares/sanitize.middleware'
+import axios from 'axios'
 // import { scheduleBonuses } from './schedulers/monthlyBonusJob'
 
 dotenv.config()
@@ -65,6 +66,19 @@ app.use('/api/affiliate', affiliateRoutes)
 app.use('/api/withdraw', withdrawalRoutes)
 app.use('/api/certificate', certificateRoutes)
 app.use('/api/coupon', couponRoutes)
+
+const url = `https://advance-learning.onrender.com`
+const interval = 30000
+function reloadWebsite() {
+  axios
+    .get(url)
+    .then((response) => console.log('Website Reload'))
+
+    .catch((error) => {
+      console.log(`Error: ${error.message}`)
+    })
+}
+setInterval(reloadWebsite, interval)
 
 // 🏠 Default Route
 app.get('/', (req, res) => {
